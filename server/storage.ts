@@ -56,6 +56,7 @@ export class MemStorage implements IStorage {
     const recipe: Recipe = { 
       ...insertRecipe, 
       id,
+      description: insertRecipe.description || null,
       matchPercentage: insertRecipe.matchPercentage || 0
     };
     this.recipes.set(id, recipe);
