@@ -54,9 +54,16 @@ export class MemStorage implements IStorage {
   async createRecipe(insertRecipe: InsertRecipe): Promise<Recipe> {
     const id = randomUUID();
     const recipe: Recipe = { 
-      ...insertRecipe, 
       id,
+      title: insertRecipe.title,
       description: insertRecipe.description || null,
+      ingredients: insertRecipe.ingredients,
+      instructions: insertRecipe.instructions || null,
+      prepTime: insertRecipe.prepTime || null,
+      difficulty: insertRecipe.difficulty || null,
+      rating: insertRecipe.rating || null,
+      sourceUrl: insertRecipe.sourceUrl,
+      imageUrl: insertRecipe.imageUrl || null,
       matchPercentage: insertRecipe.matchPercentage || 0
     };
     this.recipes.set(id, recipe);
@@ -74,8 +81,9 @@ export class MemStorage implements IStorage {
   async createSearch(insertSearch: InsertSearch): Promise<Search> {
     const id = randomUUID();
     const search: Search = {
-      ...insertSearch,
       id,
+      ingredients: insertSearch.ingredients,
+      results: insertSearch.results,
       createdAt: new Date().toISOString(),
     };
     this.searches.set(id, search);
