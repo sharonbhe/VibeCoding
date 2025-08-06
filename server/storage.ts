@@ -21,6 +21,7 @@ export class MemStorage implements IStorage {
   constructor() {
     this.recipes = new Map();
     this.searches = new Map();
+    console.log('🗄️ Initialized fresh storage');
   }
 
   async getRecipe(id: string): Promise<Recipe | undefined> {

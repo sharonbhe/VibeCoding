@@ -136,17 +136,19 @@ class RecipeScraper {
   }
 
   async scrapeRecipes(ingredients: string[]): Promise<Recipe[]> {
+    console.log('🔍 Scraping recipes for ingredients:', ingredients);
     const cacheKey = ingredients.sort().join(',');
     
-    // Check cache first
-    if (this.isCacheValid(cacheKey) && this.cache.has(cacheKey)) {
-      const cachedRecipes = this.cache.get(cacheKey)!;
-      return this.convertToRecipes(cachedRecipes, ingredients);
-    }
+    // Skip cache for now to force fresh data
+    // if (this.isCacheValid(cacheKey) && this.cache.has(cacheKey)) {
+    //   const cachedRecipes = this.cache.get(cacheKey)!;
+    //   return this.convertToRecipes(cachedRecipes, ingredients);
+    // }
 
     try {
       // Try to fetch real recipes from TheMealDB API
       const realRecipes = await this.fetchFromMealDB(ingredients);
+      console.log('📡 Fetched', realRecipes.length, 'real recipes from API');
       
       if (realRecipes.length > 0) {
         // Cache the results
@@ -156,6 +158,7 @@ class RecipeScraper {
       }
       
       // Fallback to mock data if API doesn't return results
+      console.log('⚠️ Falling back to mock data');
       const filteredRecipes = this.mockRecipes.filter(recipe => {
         const normalizedIngredients = ingredients.map(ing => ing.toLowerCase().trim());
         const normalizedRecipeIngredients = recipe.ingredients.map(ing => ing.toLowerCase().trim());
