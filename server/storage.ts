@@ -57,7 +57,7 @@ export class MemStorage implements IStorage {
       id,
       title: insertRecipe.title,
       description: insertRecipe.description || null,
-      ingredients: insertRecipe.ingredients,
+      ingredients: Array.isArray(insertRecipe.ingredients) ? insertRecipe.ingredients : [],
       instructions: insertRecipe.instructions || null,
       prepTime: insertRecipe.prepTime || null,
       difficulty: insertRecipe.difficulty || null,
@@ -82,8 +82,8 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const search: Search = {
       id,
-      ingredients: insertSearch.ingredients,
-      results: insertSearch.results,
+      ingredients: Array.isArray(insertSearch.ingredients) ? insertSearch.ingredients : [],
+      results: Array.isArray(insertSearch.results) ? insertSearch.results : [],
       createdAt: new Date().toISOString(),
     };
     this.searches.set(id, search);

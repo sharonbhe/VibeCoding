@@ -18,7 +18,10 @@ class RecipeScraper {
   private readonly CACHE_TTL = 1000 * 60 * 30; // 30 minutes
   private cacheTimestamps: Map<string, number> = new Map();
 
-  // Mock recipe data to simulate scraping from popular recipe sites
+  // TheMealDB API base URL
+  private readonly MEAL_DB_API = "https://www.themealdb.com/api/json/v1/1";
+
+  // Backup mock recipes in case API fails
   private mockRecipes: ScrapedRecipe[] = [
     {
       title: "Mediterranean Zucchini Tomato Gratin",
@@ -142,8 +145,17 @@ class RecipeScraper {
     }
 
     try {
-      // In a real implementation, this would scrape multiple recipe sites
-      // For now, we'll filter our mock data based on ingredients
+      // Try to fetch real recipes from TheMealDB API
+      const realRecipes = await this.fetchFromMealDB(ingredients);
+      
+      if (realRecipes.length > 0) {
+        // Cache the results
+        this.cache.set(cacheKey, realRecipes);
+        this.cacheTimestamps.set(cacheKey, Date.now());
+        return this.convertToRecipes(realRecipes, ingredients);
+      }
+      
+      // Fallback to mock data if API doesn't return results
       const filteredRecipes = this.mockRecipes.filter(recipe => {
         const normalizedIngredients = ingredients.map(ing => ing.toLowerCase().trim());
         const normalizedRecipeIngredients = recipe.ingredients.map(ing => ing.toLowerCase().trim());
@@ -164,6 +176,98 @@ class RecipeScraper {
       console.error('Error scraping recipes:', error);
       throw new Error('Failed to scrape recipes from external sources');
     }
+  }
+
+  private async fetchFromMealDB(ingredients: string[]): Promise<ScrapedRecipe[]> {
+    const allRecipes: ScrapedRecipe[] = [];
+    
+    // Search for recipes using each ingredient
+    for (const ingredient of ingredients) {
+      try {
+        const response = await fetch(`${this.MEAL_DB_API}/filter.php?i=${encodeURIComponent(ingredient)}`);
+        const data = await response.json();
+        
+        if (data.meals) {
+          // Get detailed info for each meal
+          for (const meal of data.meals.slice(0, 10)) { // Limit to 10 per ingredient
+            try {
+              const detailResponse = await fetch(`${this.MEAL_DB_API}/lookup.php?i=${meal.idMeal}`);
+              const detailData = await detailResponse.json();
+              
+              if (detailData.meals && detailData.meals[0]) {
+                const mealDetail = detailData.meals[0];
+                const scrapedRecipe = this.convertMealDBToScraped(mealDetail);
+                
+                // Avoid duplicates
+                if (!allRecipes.find(r => r.sourceUrl === scrapedRecipe.sourceUrl)) {
+                  allRecipes.push(scrapedRecipe);
+                }
+              }
+            } catch (detailError) {
+              console.error('Error fetching meal details:', detailError);
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Error fetching recipes for ingredient ${ingredient}:`, error);
+      }
+    }
+    
+    return allRecipes;
+  }
+
+  private convertMealDBToScraped(meal: any): ScrapedRecipe {
+    // Extract ingredients from the MealDB format
+    const ingredients: string[] = [];
+    for (let i = 1; i <= 20; i++) {
+      const ingredient = meal[`strIngredient${i}`];
+      if (ingredient && ingredient.trim()) {
+        ingredients.push(ingredient.trim());
+      }
+    }
+
+    // Extract instructions
+    const instructions = meal.strInstructions || '';
+    
+    // Estimate prep time based on instruction length and complexity
+    const prepTime = this.estimatePrepTime(instructions);
+    
+    // Determine difficulty based on ingredient count and instruction complexity
+    const difficulty = this.estimateDifficulty(ingredients.length, instructions);
+
+    return {
+      title: meal.strMeal,
+      description: `${meal.strArea || 'International'} ${meal.strCategory || 'dish'}`,
+      ingredients,
+      instructions,
+      prepTime,
+      difficulty,
+      rating: Math.random() * 1.5 + 3.5, // Random rating between 3.5 and 5
+      sourceUrl: meal.strSource || `https://www.themealdb.com/meal/${meal.idMeal}`,
+      imageUrl: meal.strMealThumb
+    };
+  }
+
+  private estimatePrepTime(instructions: string): number {
+    const length = instructions.length;
+    const steps = instructions.split('.').length;
+    
+    // Basic estimation based on complexity
+    if (length < 200) return 15;
+    if (length < 400) return 25;
+    if (length < 600) return 35;
+    return Math.min(60, 30 + steps * 2);
+  }
+
+  private estimateDifficulty(ingredientCount: number, instructions: string): string {
+    const complexWords = ['fold', 'whisk', 'reduce', 'caramelize', 'julienne', 'brunoise'];
+    const hasComplexTechniques = complexWords.some(word => 
+      instructions.toLowerCase().includes(word)
+    );
+    
+    if (ingredientCount <= 5 && !hasComplexTechniques) return 'easy';
+    if (ingredientCount <= 8 && !hasComplexTechniques) return 'medium';
+    return 'hard';
   }
 
   private async convertToRecipes(scrapedRecipes: ScrapedRecipe[], userIngredients: string[]): Promise<Recipe[]> {
