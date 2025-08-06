@@ -1,0 +1,168 @@
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { IngredientInput } from "@/components/ingredient-input";
+import { RecipeGrid } from "@/components/recipe-grid";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { type Recipe, type RecipeSearchRequest, type RecipeSearchResponse } from "@shared/schema";
+import { Utensils } from "lucide-react";
+
+export default function Home() {
+  const [ingredients, setIngredients] = useState<string[]>([]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [currentSort, setCurrentSort] = useState<string>('match');
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const searchMutation = useMutation({
+    mutationFn: async (searchRequest: RecipeSearchRequest) => {
+      const response = await apiRequest('POST', '/api/recipes/search', searchRequest);
+      return response.json() as Promise<RecipeSearchResponse>;
+    },
+    onSuccess: (data) => {
+      setRecipes(data.recipes);
+      toast({
+        title: "Search completed!",
+        description: `Found ${data.recipes.length} recipe${data.recipes.length !== 1 ? 's' : ''} matching your ingredients.`,
+      });
+    },
+    onError: (error) => {
+      console.error('Search error:', error);
+      toast({
+        title: "Search failed",
+        description: "Failed to search for recipes. Please try again later.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSearch = () => {
+    if (ingredients.length === 0) {
+      toast({
+        title: "No ingredients",
+        description: "Please add at least one ingredient to search for recipes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    searchMutation.mutate({
+      ingredients,
+      sortBy: currentSort as 'match' | 'time' | 'difficulty' | 'rating'
+    });
+  };
+
+  const handleSortChange = (sortBy: string) => {
+    setCurrentSort(sortBy);
+    if (recipes.length > 0) {
+      searchMutation.mutate({
+        ingredients,
+        sortBy: sortBy as 'match' | 'time' | 'difficulty' | 'rating'
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Utensils className="text-white h-4 w-4" />
+              </div>
+              <h1 className="text-xl font-semibold text-gray-900">Recipe Finder</h1>
+            </div>
+            <nav className="hidden md:flex space-x-6">
+              <a href="#" className="text-gray-600 hover:text-primary transition-colors">How it works</a>
+              <a href="#" className="text-gray-600 hover:text-primary transition-colors">About</a>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="bg-white py-12 lg:py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Find Delicious Recipes with Your Ingredients
+          </h2>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Enter the ingredients you have at home and discover amazing recipes that make the most of what's in your pantry.
+          </p>
+        </div>
+      </section>
+
+      {/* Search Interface */}
+      <section className="py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <IngredientInput
+            ingredients={ingredients}
+            onIngredientsChange={setIngredients}
+            onSearch={handleSearch}
+            isLoading={searchMutation.isPending}
+          />
+        </div>
+      </section>
+
+      {/* Results Section */}
+      {(recipes.length > 0 || searchMutation.isPending) && (
+        <section className="py-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RecipeGrid
+              recipes={recipes}
+              userIngredients={ingredients}
+              isLoading={searchMutation.isPending}
+              onSortChange={handleSortChange}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12 mt-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="md:col-span-2">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                  <Utensils className="text-white h-4 w-4" />
+                </div>
+                <h3 className="text-xl font-semibold">Recipe Finder</h3>
+              </div>
+              <p className="text-gray-400 mb-4 max-w-md">
+                Discover amazing recipes using the ingredients you already have at home. 
+                No food waste, just delicious meals.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Features</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li>Smart ingredient matching</li>
+                <li>Multiple recipe sources</li>
+                <li>Mobile-friendly design</li>
+                <li>No API required</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Support</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-primary transition-colors">How it works</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">FAQ</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Contact</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Privacy</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 Recipe Finder. Built for home cooks who love fresh ingredients.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
