@@ -84,39 +84,35 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-50 via-white to-orange-50 py-16 lg:py-24">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-full mb-6">
-              <Utensils className="h-10 w-10 text-primary" />
-            </div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Turn Your Ingredients Into
-              <span className="text-primary block">Amazing Recipes</span>
+      <section className="bg-gradient-to-br from-green-50 via-white to-orange-50 py-8 lg:py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 leading-tight">
+              Find Recipes with Your Ingredients
             </h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              No more food waste, no more "what should I cook?" Stop staring at your fridge and start creating delicious meals with what you already have.
+            <p className="text-lg text-gray-600 mb-4 max-w-2xl mx-auto">
+              Turn what's in your fridge into delicious meals. No waste, just great recipes.
             </p>
-            <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Real recipes from trusted sources</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>Smart ingredient matching</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span>No registration required</span>
-              </div>
+            <div className="flex flex-wrap justify-center gap-3 text-sm text-gray-500">
+              <span className="flex items-center space-x-1">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                <span>Real recipes</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <span>Smart matching</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                <span>No signup needed</span>
+              </span>
             </div>
           </div>
         </div>
       </section>
 
       {/* Search Interface */}
-      <section className="-mt-16 relative z-10">
+      <section className="-mt-4 relative z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <IngredientInput
             ingredients={ingredients}
