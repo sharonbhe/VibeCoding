@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { IngredientInput } from "@/components/ingredient-input";
 import { RecipeGrid } from "@/components/recipe-grid";
 import { useToast } from "@/hooks/use-toast";
@@ -75,8 +76,8 @@ export default function Home() {
               <h1 className="text-xl font-semibold text-gray-900">Recipe Finder</h1>
             </div>
             <nav className="hidden md:flex space-x-6">
-              <a href="#" className="text-gray-600 hover:text-primary transition-colors">How it works</a>
-              <a href="#" className="text-gray-600 hover:text-primary transition-colors">About</a>
+              <Link href="/how-it-works" className="text-gray-600 hover:text-primary transition-colors">How it works</Link>
+              <Link href="/about" className="text-gray-600 hover:text-primary transition-colors">About</Link>
             </nav>
           </div>
         </div>
