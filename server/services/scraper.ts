@@ -183,40 +183,87 @@ class RecipeScraper {
 
   private async fetchFromMealDB(ingredients: string[]): Promise<ScrapedRecipe[]> {
     const allRecipes: ScrapedRecipe[] = [];
+    const processedRecipeIds = new Set<string>();
     
-    // Search for recipes using each ingredient
+    // Search for recipes using each ingredient with variations
     for (const ingredient of ingredients) {
-      try {
-        const response = await fetch(`${this.MEAL_DB_API}/filter.php?i=${encodeURIComponent(ingredient)}`);
-        const data = await response.json();
-        
-        if (data.meals) {
-          // Get detailed info for each meal
-          for (const meal of data.meals.slice(0, 10)) { // Limit to 10 per ingredient
-            try {
-              const detailResponse = await fetch(`${this.MEAL_DB_API}/lookup.php?i=${meal.idMeal}`);
-              const detailData = await detailResponse.json();
-              
-              if (detailData.meals && detailData.meals[0]) {
-                const mealDetail = detailData.meals[0];
-                const scrapedRecipe = this.convertMealDBToScraped(mealDetail);
+      const searchTerms = this.getIngredientVariations(ingredient);
+      
+      for (const searchTerm of searchTerms) {
+        try {
+          console.log(`🔍 Searching API for: ${searchTerm}`);
+          const response = await fetch(`${this.MEAL_DB_API}/filter.php?i=${encodeURIComponent(searchTerm)}`);
+          const data = await response.json();
+          
+          if (data.meals) {
+            console.log(`📡 Found ${data.meals.length} meals for ${searchTerm}`);
+            // Get detailed info for each meal
+            for (const meal of data.meals.slice(0, 8)) { // Limit to 8 per search term
+              if (!processedRecipeIds.has(meal.idMeal)) {
+                processedRecipeIds.add(meal.idMeal);
                 
-                // Avoid duplicates
-                if (!allRecipes.find(r => r.sourceUrl === scrapedRecipe.sourceUrl)) {
-                  allRecipes.push(scrapedRecipe);
+                try {
+                  const detailResponse = await fetch(`${this.MEAL_DB_API}/lookup.php?i=${meal.idMeal}`);
+                  const detailData = await detailResponse.json();
+                  
+                  if (detailData.meals && detailData.meals[0]) {
+                    const mealDetail = detailData.meals[0];
+                    const scrapedRecipe = this.convertMealDBToScraped(mealDetail);
+                    allRecipes.push(scrapedRecipe);
+                  }
+                } catch (detailError) {
+                  console.error('Error fetching meal details:', detailError);
                 }
               }
-            } catch (detailError) {
-              console.error('Error fetching meal details:', detailError);
             }
+          } else {
+            console.log(`❌ No meals found for ${searchTerm}`);
           }
+        } catch (error) {
+          console.error(`Error fetching recipes for ingredient ${searchTerm}:`, error);
         }
-      } catch (error) {
-        console.error(`Error fetching recipes for ingredient ${ingredient}:`, error);
       }
     }
     
+    console.log(`🍽️ Total unique recipes found: ${allRecipes.length}`);
     return allRecipes;
+  }
+
+  private getIngredientVariations(ingredient: string): string[] {
+    const normalized = ingredient.toLowerCase().trim();
+    const variations = [normalized];
+    
+    // Handle common ingredient variations
+    const ingredientMap: { [key: string]: string[] } = {
+      'tomatoes': ['tomato', 'tomatoes'],
+      'tomato': ['tomato', 'tomatoes'],
+      'zucchini': ['zucchini', 'courgette'],
+      'zucchinis': ['zucchini', 'courgette'],
+      'onions': ['onion', 'onions'],
+      'onion': ['onion', 'onions'],
+      'potatoes': ['potato', 'potatoes'],
+      'potato': ['potato', 'potatoes'],
+      'carrots': ['carrot', 'carrots'],
+      'carrot': ['carrot', 'carrots'],
+      'peppers': ['pepper', 'peppers', 'bell pepper'],
+      'pepper': ['pepper', 'peppers', 'bell pepper'],
+      'chicken': ['chicken', 'chicken breast'],
+      'beef': ['beef', 'ground beef'],
+      'pork': ['pork', 'pork chops'],
+    };
+    
+    if (ingredientMap[normalized]) {
+      return ingredientMap[normalized];
+    }
+    
+    // Add singular/plural variations
+    if (normalized.endsWith('s') && normalized.length > 3) {
+      variations.push(normalized.slice(0, -1)); // Remove 's'
+    } else {
+      variations.push(normalized + 's'); // Add 's'
+    }
+    
+    return [...new Set(variations)]; // Remove duplicates
   }
 
   private convertMealDBToScraped(meal: any): ScrapedRecipe {
