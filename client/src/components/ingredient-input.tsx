@@ -159,24 +159,34 @@ export function IngredientInput({
       </div>
 
       {/* Quick Add Buttons */}
-      {ingredients.length === 0 && (
-        <div className="mb-6">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">Popular ingredients:</h4>
-          <div className="flex flex-wrap gap-2">
-            {QUICK_ADD_SUGGESTIONS.map((item) => (
+      <div className="mb-6">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">Popular ingredients:</h4>
+        <div className="flex flex-wrap gap-2">
+          {QUICK_ADD_SUGGESTIONS.map((item) => {
+            const isAdded = ingredients.includes(item.name.toLowerCase());
+            return (
               <button
                 key={item.name}
                 onClick={() => addIngredient(item.name)}
-                className="inline-flex items-center space-x-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm transition-colors"
+                disabled={isAdded}
+                className={`inline-flex items-center space-x-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                  isAdded 
+                    ? 'bg-primary/10 text-primary cursor-default' 
+                    : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                }`}
               >
                 <span>{item.icon}</span>
                 <span className="capitalize">{item.name}</span>
-                <Plus className="h-3 w-3" />
+                {isAdded ? (
+                  <span className="text-xs">✓</span>
+                ) : (
+                  <Plus className="h-3 w-3" />
+                )}
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      )}
+      </div>
 
       {ingredients.length > 0 && (
         <div className="mb-6">
