@@ -221,6 +221,23 @@ export function IngredientInput({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex items-center space-x-2">
+          <label htmlFor="results-per-page" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            Results per page:
+          </label>
+          <Select value={resultsPerPage.toString()} onValueChange={(value) => onResultsPerPageChange(parseInt(value))}>
+            <SelectTrigger className="w-20 py-4 rounded-xl border-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="6">6</SelectItem>
+              <SelectItem value="9">9</SelectItem>
+              <SelectItem value="12">12</SelectItem>
+              <SelectItem value="15">15</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
         <Button 
           onClick={onSearch}
           disabled={ingredients.length === 0 || isLoading}
@@ -230,34 +247,15 @@ export function IngredientInput({
           <span className="text-lg">{isLoading ? 'Searching Recipes...' : 'Find Recipes'}</span>
         </Button>
         
-        <div className="flex items-center gap-3">
-          <div className="flex items-center space-x-2">
-            <label htmlFor="results-per-page" className="text-sm font-medium text-gray-700 whitespace-nowrap">
-              Results per page:
-            </label>
-            <Select value={resultsPerPage.toString()} onValueChange={(value) => onResultsPerPageChange(parseInt(value))}>
-              <SelectTrigger className="w-20 py-4 rounded-xl border-2">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="6">6</SelectItem>
-                <SelectItem value="9">9</SelectItem>
-                <SelectItem value="12">12</SelectItem>
-                <SelectItem value="15">15</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {ingredients.length > 0 && (
-            <Button 
-              variant="outline"
-              onClick={() => onIngredientsChange([])}
-              className="py-4 px-6 rounded-xl border-2 hover:bg-gray-50 transition-colors"
-            >
-              Clear All
-            </Button>
-          )}
-        </div>
+        {ingredients.length > 0 && (
+          <Button 
+            variant="outline"
+            onClick={() => onIngredientsChange([])}
+            className="py-4 px-6 rounded-xl border-2 hover:bg-gray-50 transition-colors"
+          >
+            Clear All
+          </Button>
+        )}
       </div>
     </div>
   );
