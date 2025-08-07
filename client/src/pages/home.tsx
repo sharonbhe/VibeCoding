@@ -12,6 +12,7 @@ export default function Home() {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [currentSort, setCurrentSort] = useState<string>('match');
+  const [resultsPerPage, setResultsPerPage] = useState<number>(10);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -119,6 +120,8 @@ export default function Home() {
             onIngredientsChange={setIngredients}
             onSearch={handleSearch}
             isLoading={searchMutation.isPending}
+            resultsPerPage={resultsPerPage}
+            onResultsPerPageChange={setResultsPerPage}
           />
         </div>
       </section>
@@ -128,7 +131,7 @@ export default function Home() {
         <section className="py-8">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <RecipeGrid
-              recipes={recipes}
+              recipes={recipes.slice(0, resultsPerPage)}
               userIngredients={ingredients}
               isLoading={searchMutation.isPending}
               onSortChange={handleSortChange}

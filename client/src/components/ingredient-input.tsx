@@ -2,6 +2,7 @@ import { useState, KeyboardEvent, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Search, Plus, ChefHat } from "lucide-react";
 
 interface IngredientInputProps {
@@ -9,6 +10,8 @@ interface IngredientInputProps {
   onIngredientsChange: (ingredients: string[]) => void;
   onSearch: () => void;
   isLoading?: boolean;
+  resultsPerPage: number;
+  onResultsPerPageChange: (value: number) => void;
 }
 
 // Popular ingredients for suggestions
@@ -37,7 +40,9 @@ export function IngredientInput({
   ingredients, 
   onIngredientsChange, 
   onSearch, 
-  isLoading = false 
+  isLoading = false,
+  resultsPerPage,
+  onResultsPerPageChange
 }: IngredientInputProps) {
   const [inputValue, setInputValue] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -213,15 +218,34 @@ export function IngredientInput({
           <span className="text-lg">{isLoading ? 'Searching Recipes...' : 'Find Recipes'}</span>
         </Button>
         
-        {ingredients.length > 0 && (
-          <Button 
-            variant="outline"
-            onClick={() => onIngredientsChange([])}
-            className="sm:w-auto py-4 px-6 rounded-xl border-2 hover:bg-gray-50 transition-colors"
-          >
-            Clear All
-          </Button>
-        )}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center space-x-2">
+            <label htmlFor="results-per-page" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Results per page:
+            </label>
+            <Select value={resultsPerPage.toString()} onValueChange={(value) => onResultsPerPageChange(parseInt(value))}>
+              <SelectTrigger className="w-20 py-4 rounded-xl border-2">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="15">15</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {ingredients.length > 0 && (
+            <Button 
+              variant="outline"
+              onClick={() => onIngredientsChange([])}
+              className="py-4 px-6 rounded-xl border-2 hover:bg-gray-50 transition-colors"
+            >
+              Clear All
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
