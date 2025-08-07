@@ -112,7 +112,7 @@ export function RecipeCard({ recipe, userIngredients }: RecipeCardProps) {
               <div className="flex">
                 {renderStars(recipe.rating)}
               </div>
-              <span className="text-sm text-gray-600">{recipe.rating}</span>
+              <span className="text-sm text-gray-600">{recipe.rating.toFixed(1)}</span>
             </div>
           )}
           <a 
