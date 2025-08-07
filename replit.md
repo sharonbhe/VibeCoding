@@ -34,8 +34,10 @@ Preferred communication style: Simple, everyday language.
 - **Type Safety**: Drizzle-Zod integration for runtime validation of database operations
 
 ### Authentication and Authorization
-- Currently uses session-based authentication setup with PostgreSQL session store
+- Session-based authentication with express-session middleware
+- Production requires SESSION_SECRET environment variable for security
 - Sessions configured with secure cookie settings and proper session management
+- 24-hour session duration with HTTP-only cookies for XSS protection
 
 ### Recipe Discovery System
 - **Ingredient Matching**: Smart algorithm that matches user ingredients with recipe requirements
@@ -69,3 +71,23 @@ Preferred communication style: Simple, everyday language.
 - The application is designed to scrape recipes from multiple cooking websites
 - Currently implements mock data but architected to easily integrate with real recipe APIs
 - Built-in rate limiting and caching to respect external service limits
+
+## Deployment Configuration
+
+### Production Requirements
+- **SESSION_SECRET environment variable**: Required for secure session management in production
+- **Static file serving**: Production builds require `deploy-prep.js` script to copy files from `dist/public` to `server/public`
+- **Environment validation**: Application validates required environment variables on startup
+
+### Deployment Process
+1. Build application: `npm run build`
+2. Prepare deployment files: `node deploy-prep.js`
+3. Set SESSION_SECRET environment variable
+4. Start production server: `npm start`
+
+### Recent Changes (January 2025)
+- ✓ Added SESSION_SECRET environment variable validation and configuration
+- ✓ Implemented comprehensive session middleware with secure settings
+- ✓ Created deployment preparation script to handle static file path mismatch
+- ✓ Added detailed error handling with helpful deployment instructions
+- ✓ Enhanced production environment checks and validation
