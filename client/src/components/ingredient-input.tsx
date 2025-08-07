@@ -153,6 +153,38 @@ export function IngredientInput({
             ))}
           </div>
         )}
+        
+        {/* Selected Ingredients Display */}
+        {ingredients.length > 0 && (
+          <div className="mt-3 mb-4">
+            <div className="flex items-center space-x-2 mb-3">
+              <h4 className="text-sm font-medium text-gray-700">Your ingredients:</h4>
+              <Badge variant="outline" className="text-xs">
+                {ingredients.length} {ingredients.length === 1 ? 'item' : 'items'}
+              </Badge>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {ingredients.map((ingredient) => (
+                <Badge 
+                  key={ingredient} 
+                  variant="secondary"
+                  className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors group"
+                >
+                  <span className="capitalize">{ingredient}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeIngredient(ingredient)}
+                    className="ml-2 h-5 w-5 p-0 text-primary/60 hover:text-primary hover:bg-primary/10 rounded-full transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+        
         <p className="text-sm text-gray-500 mt-2">
           Type and press Enter to add ingredients, or click suggestions below
         </p>
@@ -187,36 +219,6 @@ export function IngredientInput({
           })}
         </div>
       </div>
-
-      {ingredients.length > 0 && (
-        <div className="mb-6">
-          <div className="flex items-center space-x-2 mb-3">
-            <h4 className="text-sm font-medium text-gray-700">Your ingredients:</h4>
-            <Badge variant="outline" className="text-xs">
-              {ingredients.length} {ingredients.length === 1 ? 'item' : 'items'}
-            </Badge>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {ingredients.map((ingredient) => (
-              <Badge 
-                key={ingredient} 
-                variant="secondary"
-                className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors group"
-              >
-                <span className="capitalize">{ingredient}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeIngredient(ingredient)}
-                  className="ml-2 h-5 w-5 p-0 text-primary/60 hover:text-primary hover:bg-primary/10 rounded-full transition-colors"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="flex flex-col sm:flex-row gap-4">
         <Button 
