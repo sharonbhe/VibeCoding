@@ -12,7 +12,7 @@ export default function Home() {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [currentSort, setCurrentSort] = useState<string>('match');
-  const [resultsPerPage, setResultsPerPage] = useState<number>(10);
+  const [resultsPerPage, setResultsPerPage] = useState<number>(9);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
