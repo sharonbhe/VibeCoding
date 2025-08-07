@@ -10,9 +10,10 @@ interface RecipeGridProps {
   userIngredients: string[];
   isLoading?: boolean;
   onSortChange: (sortBy: string) => void;
+  totalRecipes?: number;
 }
 
-export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSortChange }: RecipeGridProps) {
+export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSortChange, totalRecipes }: RecipeGridProps) {
   const [displayCount, setDisplayCount] = useState(6);
 
   const visibleRecipes = recipes.slice(0, displayCount);
@@ -52,7 +53,7 @@ export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSort
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-xl font-semibold text-gray-900">
-            Showing {visibleRecipes.length} of {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
+            Showing {recipes.length} of {totalRecipes || recipes.length} recipe{(totalRecipes || recipes.length) !== 1 ? 's' : ''}
           </h3>
           <p className="text-sm text-gray-600 mt-1">
             Showing recipes that match your ingredients
