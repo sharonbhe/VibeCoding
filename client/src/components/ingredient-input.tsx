@@ -1,8 +1,8 @@
-import { useState, KeyboardEvent } from "react";
+import { useState, KeyboardEvent, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Search } from "lucide-react";
+import { X, Search, Plus, ChefHat } from "lucide-react";
 
 interface IngredientInputProps {
   ingredients: string[];
@@ -11,6 +11,28 @@ interface IngredientInputProps {
   isLoading?: boolean;
 }
 
+// Popular ingredients for suggestions
+const POPULAR_INGREDIENTS = [
+  'chicken', 'beef', 'pork', 'fish', 'salmon', 'shrimp',
+  'pasta', 'rice', 'noodles', 'bread', 'flour',
+  'tomatoes', 'onions', 'garlic', 'potatoes', 'carrots', 'bell peppers',
+  'zucchini', 'broccoli', 'spinach', 'mushrooms', 'corn', 'peas',
+  'cheese', 'milk', 'eggs', 'butter', 'olive oil',
+  'lemon', 'lime', 'herbs', 'basil', 'parsley', 'cilantro',
+  'beans', 'lentils', 'chickpeas', 'quinoa', 'oats'
+];
+
+const QUICK_ADD_SUGGESTIONS = [
+  { name: 'chicken', icon: '🐔' },
+  { name: 'tomatoes', icon: '🍅' },
+  { name: 'onions', icon: '🧅' },
+  { name: 'garlic', icon: '🧄' },
+  { name: 'pasta', icon: '🍝' },
+  { name: 'rice', icon: '🍚' },
+  { name: 'cheese', icon: '🧀' },
+  { name: 'eggs', icon: '🥚' }
+];
+
 export function IngredientInput({ 
   ingredients, 
   onIngredientsChange, 
@@ -18,19 +40,39 @@ export function IngredientInput({
   isLoading = false 
 }: IngredientInputProps) {
   const [inputValue, setInputValue] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (inputValue.length > 0) {
+      const filtered = POPULAR_INGREDIENTS.filter(ingredient =>
+        ingredient.toLowerCase().includes(inputValue.toLowerCase()) &&
+        !ingredients.includes(ingredient.toLowerCase())
+      ).slice(0, 5);
+      setFilteredSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
+  }, [inputValue, ingredients]);
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && inputValue.trim()) {
       e.preventDefault();
-      addIngredient();
+      addIngredient(inputValue.trim());
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
     }
   };
 
-  const addIngredient = () => {
-    const newIngredient = inputValue.trim().toLowerCase();
+  const addIngredient = (ingredient: string) => {
+    const newIngredient = ingredient.toLowerCase();
     if (newIngredient && !ingredients.includes(newIngredient)) {
       onIngredientsChange([...ingredients, newIngredient]);
       setInputValue("");
+      setShowSuggestions(false);
+      inputRef.current?.focus();
     }
   };
 
@@ -38,56 +80,140 @@ export function IngredientInput({
     onIngredientsChange(ingredients.filter(ing => ing !== ingredientToRemove));
   };
 
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+  };
+
+  const handleInputFocus = () => {
+    if (inputValue.length > 0) {
+      setShowSuggestions(true);
+    }
+  };
+
+  const handleInputBlur = () => {
+    // Delay hiding suggestions to allow clicks
+    setTimeout(() => setShowSuggestions(false), 150);
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 md:p-8">
       <div className="mb-6">
-        <label htmlFor="ingredient-input" className="block text-sm font-medium text-gray-700 mb-3">
-          What ingredients do you have?
-        </label>
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+            <ChefHat className="h-4 w-4 text-primary" />
+          </div>
+          <label htmlFor="ingredient-input" className="text-lg font-semibold text-gray-900">
+            What ingredients do you have?
+          </label>
+        </div>
         <div className="relative">
           <Input
+            ref={inputRef}
             id="ingredient-input"
             type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => handleInputChange(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type an ingredient and press Enter (e.g., tomatoes, zucchini, chicken)"
-            className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+            placeholder="Start typing an ingredient (e.g., chicken, tomatoes, pasta)..."
+            className="w-full px-4 py-4 pr-12 text-lg border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
           />
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          
+          {/* Autocomplete Dropdown */}
+          {showSuggestions && filteredSuggestions.length > 0 && (
+            <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+              {filteredSuggestions.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  onClick={() => addIngredient(suggestion)}
+                  className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none first:rounded-t-xl last:rounded-b-xl transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Plus className="h-4 w-4 text-gray-400" />
+                    <span className="capitalize text-gray-900">{suggestion}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
+        <p className="text-sm text-gray-500 mt-2">
+          Type and press Enter to add ingredients, or click suggestions below
+        </p>
       </div>
 
-      {ingredients.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          {ingredients.map((ingredient) => (
-            <Badge 
-              key={ingredient} 
-              variant="secondary"
-              className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary hover:bg-primary/20"
-            >
-              <span className="capitalize">{ingredient}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeIngredient(ingredient)}
-                className="ml-2 h-4 w-4 p-0 text-primary hover:text-primary/80"
+      {/* Quick Add Buttons */}
+      {ingredients.length === 0 && (
+        <div className="mb-6">
+          <h4 className="text-sm font-medium text-gray-700 mb-3">Popular ingredients:</h4>
+          <div className="flex flex-wrap gap-2">
+            {QUICK_ADD_SUGGESTIONS.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => addIngredient(item.name)}
+                className="inline-flex items-center space-x-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm transition-colors"
               >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          ))}
+                <span>{item.icon}</span>
+                <span className="capitalize">{item.name}</span>
+                <Plus className="h-3 w-3" />
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      <Button 
-        onClick={onSearch}
-        disabled={ingredients.length === 0 || isLoading}
-        className="w-full md:w-auto bg-primary hover:bg-primary/90 text-white font-medium py-3 px-8 rounded-lg transition-colors flex items-center justify-center space-x-2"
-      >
-        <Search className="h-4 w-4" />
-        <span>{isLoading ? 'Searching...' : 'Find Recipes'}</span>
-      </Button>
+      {ingredients.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center space-x-2 mb-3">
+            <h4 className="text-sm font-medium text-gray-700">Your ingredients:</h4>
+            <Badge variant="outline" className="text-xs">
+              {ingredients.length} {ingredients.length === 1 ? 'item' : 'items'}
+            </Badge>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {ingredients.map((ingredient) => (
+              <Badge 
+                key={ingredient} 
+                variant="secondary"
+                className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors group"
+              >
+                <span className="capitalize">{ingredient}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeIngredient(ingredient)}
+                  className="ml-2 h-5 w-5 p-0 text-primary/60 hover:text-primary hover:bg-primary/10 rounded-full transition-colors"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Button 
+          onClick={onSearch}
+          disabled={ingredients.length === 0 || isLoading}
+          className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Search className="h-5 w-5" />
+          <span className="text-lg">{isLoading ? 'Searching Recipes...' : 'Find Recipes'}</span>
+        </Button>
+        
+        {ingredients.length > 0 && (
+          <Button 
+            variant="outline"
+            onClick={() => onIngredientsChange([])}
+            className="sm:w-auto py-4 px-6 rounded-xl border-2 hover:bg-gray-50 transition-colors"
+          >
+            Clear All
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

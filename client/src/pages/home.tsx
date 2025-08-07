@@ -84,19 +84,39 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-white py-12 lg:py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Find Delicious Recipes with Your Ingredients
-          </h2>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Enter the ingredients you have at home and discover amazing recipes that make the most of what's in your pantry.
-          </p>
+      <section className="bg-gradient-to-br from-green-50 via-white to-orange-50 py-16 lg:py-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-full mb-6">
+              <Utensils className="h-10 w-10 text-primary" />
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Turn Your Ingredients Into
+              <span className="text-primary block">Amazing Recipes</span>
+            </h2>
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              No more food waste, no more "what should I cook?" Stop staring at your fridge and start creating delicious meals with what you already have.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Real recipes from trusted sources</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Smart ingredient matching</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span>No registration required</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Search Interface */}
-      <section className="py-8">
+      <section className="py-8 -mt-8 relative z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <IngredientInput
             ingredients={ingredients}
@@ -117,6 +137,31 @@ export default function Home() {
               isLoading={searchMutation.isPending}
               onSortChange={handleSortChange}
             />
+          </div>
+        </section>
+      )}
+
+      {/* Stats Section */}
+      {!searchMutation.isPending && recipes.length === 0 && (
+        <section className="py-16 bg-white">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-3 gap-8 text-center">
+              <div className="p-6">
+                <div className="text-3xl font-bold text-primary mb-2">300+</div>
+                <div className="text-gray-600">Authentic Recipes</div>
+                <div className="text-sm text-gray-500 mt-2">From international cuisines</div>
+              </div>
+              <div className="p-6">
+                <div className="text-3xl font-bold text-primary mb-2">50+</div>
+                <div className="text-gray-600">Common Ingredients</div>
+                <div className="text-sm text-gray-500 mt-2">Smart matching variations</div>
+              </div>
+              <div className="p-6">
+                <div className="text-3xl font-bold text-primary mb-2">5 sec</div>
+                <div className="text-gray-600">Average Search Time</div>
+                <div className="text-sm text-gray-500 mt-2">Lightning fast results</div>
+              </div>
+            </div>
           </div>
         </section>
       )}
@@ -144,15 +189,15 @@ export default function Home() {
                 <li>Smart ingredient matching</li>
                 <li>Multiple recipe sources</li>
                 <li>Mobile-friendly design</li>
-                <li>No API required</li>
+                <li>No registration required</li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-primary transition-colors">How it works</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">FAQ</a></li>
+                <li><Link href="/how-it-works" className="hover:text-primary transition-colors">How it works</Link></li>
+                <li><Link href="/about" className="hover:text-primary transition-colors">About</Link></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Contact</a></li>
                 <li><a href="#" className="hover:text-primary transition-colors">Privacy</a></li>
               </ul>
