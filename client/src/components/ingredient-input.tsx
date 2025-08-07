@@ -106,39 +106,48 @@ export function IngredientInput({
             What ingredients do you have?
           </label>
         </div>
-        <div className="relative">
-          <Input
-            ref={inputRef}
-            id="ingredient-input"
-            type="text"
-            value={inputValue}
-            onChange={(e) => handleInputChange(e.target.value)}
-            onKeyPress={handleKeyPress}
-            onFocus={handleInputFocus}
-            onBlur={handleInputBlur}
-            placeholder="Start typing an ingredient (e.g., chicken, tomatoes, pasta)..."
-            className="w-full px-4 py-4 pr-12 text-lg border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
-          />
-          <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-          
-          {/* Autocomplete Dropdown */}
-          {showSuggestions && filteredSuggestions.length > 0 && (
-            <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
-              {filteredSuggestions.map((suggestion) => (
-                <button
-                  key={suggestion}
-                  onClick={() => addIngredient(suggestion)}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none first:rounded-t-xl last:rounded-b-xl transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <Plus className="h-4 w-4 text-gray-400" />
-                    <span className="capitalize text-gray-900">{suggestion}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Input
+              ref={inputRef}
+              id="ingredient-input"
+              type="text"
+              value={inputValue}
+              onChange={(e) => handleInputChange(e.target.value)}
+              onKeyPress={handleKeyPress}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              placeholder="Start typing an ingredient (e.g., chicken, tomatoes, pasta)..."
+              className="w-full px-4 py-4 pr-12 text-lg border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
+            />
+            <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          </div>
+          <Button
+            onClick={() => inputValue.trim() && addIngredient(inputValue.trim())}
+            disabled={!inputValue.trim() || ingredients.includes(inputValue.trim().toLowerCase())}
+            className="px-6 py-4 bg-primary hover:bg-primary/90 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Add
+          </Button>
         </div>
+        
+        {/* Autocomplete Dropdown */}
+        {showSuggestions && filteredSuggestions.length > 0 && (
+          <div className="absolute z-10 left-0 right-20 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+            {filteredSuggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                onClick={() => addIngredient(suggestion)}
+                className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none first:rounded-t-xl last:rounded-b-xl transition-colors"
+              >
+                <div className="flex items-center space-x-3">
+                  <Plus className="h-4 w-4 text-gray-400" />
+                  <span className="capitalize text-gray-900">{suggestion}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
         <p className="text-sm text-gray-500 mt-2">
           Type and press Enter to add ingredients, or click suggestions below
         </p>

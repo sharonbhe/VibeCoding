@@ -116,7 +116,7 @@ export default function Home() {
       </section>
 
       {/* Search Interface */}
-      <section className="py-8 -mt-8 relative z-10">
+      <section className="-mt-16 relative z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <IngredientInput
             ingredients={ingredients}
