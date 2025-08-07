@@ -91,7 +91,7 @@ export default function Home() {
               Find Recipes with Your Ingredients
             </h2>
             <p className="text-lg text-gray-600 mb-4 max-w-2xl mx-auto">
-              Turn what's in your fridge into delicious meals. No waste, just great recipes.
+              Discover delicious recipes with the ingredients you already have!
             </p>
             <div className="flex flex-wrap justify-center gap-3 text-sm text-gray-500">
               <span className="flex items-center space-x-1">
