@@ -301,11 +301,21 @@ export function IngredientInput({
         {/* Selected Ingredients Display */}
         {ingredients.length > 0 && (
           <div className="mt-3 mb-4">
-            <div className="flex items-center space-x-2 mb-3">
-              <h4 className="text-sm font-medium text-gray-700">Your ingredients:</h4>
-              <Badge variant="outline" className="text-xs">
-                {ingredients.length} {ingredients.length === 1 ? 'item' : 'items'}
-              </Badge>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <h4 className="text-sm font-medium text-gray-700">Your ingredients:</h4>
+                <Badge variant="outline" className="text-xs">
+                  {ingredients.length} {ingredients.length === 1 ? 'item' : 'items'}
+                </Badge>
+              </div>
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={() => onIngredientsChange([])}
+                className="h-8 px-3 text-xs border-gray-300 hover:bg-gray-50 transition-colors"
+              >
+                Clear All
+              </Button>
             </div>
             <div className="flex flex-wrap gap-3">
               {ingredients.map((ingredient) => (
@@ -417,16 +427,6 @@ export function IngredientInput({
           <Search className="h-5 w-5" />
           <span className="text-lg">{isLoading ? 'Searching Recipes...' : 'Find Recipes'}</span>
         </Button>
-        
-        {ingredients.length > 0 && (
-          <Button 
-            variant="outline"
-            onClick={() => onIngredientsChange([])}
-            className="py-4 px-6 rounded-xl border-2 hover:bg-gray-50 transition-colors"
-          >
-            Clear All
-          </Button>
-        )}
       </div>
     </div>
   );
