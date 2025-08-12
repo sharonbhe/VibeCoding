@@ -244,7 +244,7 @@ export function IngredientInput({
           className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Search className="h-5 w-5" />
-          <span className="text-lg">{isLoading ? 'Searching Recipes...' : 'Find Recipes'}</span>
+          <span className="text-lg">{isLoading ? 'Searching Recipes...' : 'Look for Recipes'}</span>
         </Button>
         
         {ingredients.length > 0 && (
