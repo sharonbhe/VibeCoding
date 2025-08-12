@@ -64,7 +64,7 @@ export function RecipeCard({ recipe, userIngredients }: RecipeCardProps) {
           {recipe.prepTime && (
             <div className="flex items-center space-x-1 text-sm text-gray-500">
               <Clock className="h-4 w-4" />
-              <span>{recipe.prepTime} min</span>
+              <span>{recipe.isTimeEstimated ? '~' : ''}{recipe.prepTime} min</span>
             </div>
           )}
         </div>

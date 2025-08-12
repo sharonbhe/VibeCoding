@@ -7,6 +7,7 @@ interface ScrapedRecipe {
   ingredients: string[];
   instructions?: string;
   prepTime?: number;
+  isTimeEstimated?: boolean;
   difficulty?: string;
   rating?: number;
   sourceUrl: string;
@@ -279,8 +280,8 @@ class RecipeScraper {
     // Extract instructions
     const instructions = meal.strInstructions || '';
     
-    // Estimate prep time based on instruction length and complexity
-    const prepTime = this.estimatePrepTime(instructions);
+    // Extract time information and determine if it's estimated
+    const timeInfo = this.extractTimeFromInstructions(instructions);
     
     // Determine difficulty based on ingredient count and instruction complexity
     const difficulty = this.estimateDifficulty(ingredients.length, instructions);
@@ -290,7 +291,8 @@ class RecipeScraper {
       description: `${meal.strArea || 'International'} ${meal.strCategory || 'dish'}`,
       ingredients,
       instructions,
-      prepTime,
+      prepTime: timeInfo.minutes,
+      isTimeEstimated: timeInfo.isEstimated,
       difficulty,
       rating: Math.random() * 1.5 + 3.5, // Random rating between 3.5 and 5
       sourceUrl: meal.strSource || `https://www.themealdb.com/meal/${meal.idMeal}`,
@@ -298,25 +300,61 @@ class RecipeScraper {
     };
   }
 
-  private estimatePrepTime(instructions: string): number {
+  private extractTimeFromInstructions(instructions: string): { minutes: number; isEstimated: boolean } {
     const instructionsLower = instructions.toLowerCase();
-    const length = instructions.length;
-    const steps = instructions.split(/[.!]/).filter(step => step.trim().length > 10).length;
     
-    // Look for explicit time mentions in instructions
-    const timeMatches = instructionsLower.match(/(\d+)\s*(hour|hr|minute|min)/g);
-    if (timeMatches) {
+    // Look for explicit total time statements first (most accurate)
+    const totalTimePatterns = [
+      /total[^.]*?(\d+)\s*(?:hours?|hrs?)\s*(?:and\s+)?(\d+)?\s*(?:minutes?|mins?)/i,
+      /total[^.]*?(\d+)\s*(?:minutes?|mins?)/i,
+      /total[^.]*?(\d+)\s*(?:hours?|hrs?)/i,
+      /(?:takes|requires|needs)[^.]*?(\d+)\s*(?:hours?|hrs?)\s*(?:and\s+)?(\d+)?\s*(?:minutes?|mins?)/i,
+      /(\d+)\s*(?:hours?|hrs?)\s*(?:and\s+)?(\d+)?\s*(?:minutes?|mins?)[^.]*?(?:total|altogether|in total)/i
+    ];
+    
+    for (const pattern of totalTimePatterns) {
+      const match = instructionsLower.match(pattern);
+      if (match) {
+        const hours = parseInt(match[1] || '0');
+        const minutes = parseInt(match[2] || '0');
+        const totalMinutes = hours * 60 + minutes;
+        
+        if (totalMinutes > 0) {
+          return { minutes: Math.min(totalMinutes, 300), isEstimated: false }; // Cap at 5 hours
+        }
+      }
+    }
+    
+    // Look for any explicit time mentions in instructions
+    const timeMatches = instructionsLower.match(/(\d+)\s*(?:hours?|hrs?|minutes?|mins?)/g);
+    if (timeMatches && timeMatches.length > 0) {
       let totalMinutes = 0;
+      let hasExplicitTime = false;
+      
       timeMatches.forEach(match => {
         const timeValue = parseInt(match.match(/\d+/)?.[0] || '0');
         if (match.includes('hour') || match.includes('hr')) {
           totalMinutes += timeValue * 60;
-        } else {
+          hasExplicitTime = true;
+        } else if (match.includes('minute') || match.includes('min')) {
           totalMinutes += timeValue;
+          hasExplicitTime = true;
         }
       });
-      if (totalMinutes > 0) return Math.min(totalMinutes, 180); // Cap at 3 hours
+      
+      if (hasExplicitTime && totalMinutes > 0) {
+        return { minutes: Math.min(totalMinutes, 300), isEstimated: false };
+      }
     }
+    
+    // Fallback to estimation
+    return { minutes: this.estimatePrepTime(instructions), isEstimated: true };
+  }
+
+  private estimatePrepTime(instructions: string): number {
+    const instructionsLower = instructions.toLowerCase();
+    const length = instructions.length;
+    const steps = instructions.split(/[.!]/).filter(step => step.trim().length > 10).length;
     
     // Enhanced estimation based on cooking methods and complexity
     let baseTime = 20;
@@ -365,6 +403,7 @@ class RecipeScraper {
         ingredients: scraped.ingredients,
         instructions: scraped.instructions,
         prepTime: scraped.prepTime,
+        isTimeEstimated: scraped.isTimeEstimated,
         difficulty: scraped.difficulty,
         rating: scraped.rating,
         sourceUrl: scraped.sourceUrl,
