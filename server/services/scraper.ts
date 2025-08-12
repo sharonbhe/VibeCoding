@@ -9,6 +9,7 @@ interface ScrapedRecipe {
   prepTime?: number;
   isTimeEstimated?: boolean;
   difficulty?: string;
+  cuisine?: string;
   rating?: number;
   sourceUrl: string;
   imageUrl?: string;
@@ -412,7 +413,7 @@ class RecipeScraper {
         ingredients: scraped.ingredients,
         instructions: scraped.instructions,
         prepTime: scraped.prepTime,
-        isTimeEstimated: scraped.isTimeEstimated,
+        isTimeEstimated: scraped.isTimeEstimated ? 1 : 0,
         difficulty: scraped.difficulty,
         cuisine: scraped.cuisine, // Add the missing cuisine field
         rating: scraped.rating,

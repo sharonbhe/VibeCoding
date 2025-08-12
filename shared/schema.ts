@@ -10,7 +10,7 @@ export const recipes = pgTable("recipes", {
   ingredients: json("ingredients").$type<string[]>().notNull(),
   instructions: text("instructions"),
   prepTime: integer("prep_time"), // in minutes
-  isTimeEstimated: integer("is_time_estimated", { mode: 'boolean' }).default(true), // true if time is estimated, false if from recipe
+  isTimeEstimated: integer("is_time_estimated").default(1), // 1 if time is estimated, 0 if from recipe
   difficulty: text("difficulty"), // easy, medium, hard
   cuisine: text("cuisine"), // cuisine type like 'italian', 'chinese', 'mexican', etc.
   rating: real("rating"),
