@@ -383,50 +383,58 @@ export function IngredientInput({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex items-center space-x-2">
-          <label htmlFor="cuisine-select" className="text-sm font-medium text-gray-700 whitespace-nowrap">
-            Cuisine:
-          </label>
-          <Select value={selectedCuisine} onValueChange={onCuisineChange}>
-            <SelectTrigger className="w-32 py-4 rounded-xl border-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {CUISINE_TYPES.map((cuisine) => (
-                <SelectItem key={cuisine} value={cuisine}>
-                  {cuisine === 'all' ? 'All Cuisines' : cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Filters and Search Button Layout */}
+      <div className="flex flex-col gap-4">
+        {/* Filters Row */}
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
+          <div className="flex items-center space-x-2">
+            <label htmlFor="cuisine-select" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Cuisine:
+            </label>
+            <Select value={selectedCuisine} onValueChange={onCuisineChange}>
+              <SelectTrigger className="w-36 py-3 rounded-xl border-2">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CUISINE_TYPES.map((cuisine) => (
+                  <SelectItem key={cuisine} value={cuisine}>
+                    {cuisine === 'all' ? 'All Cuisines' : cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <label htmlFor="results-per-page" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Show:
+            </label>
+            <Select value={resultsPerPage.toString()} onValueChange={(value) => onResultsPerPageChange(parseInt(value))}>
+              <SelectTrigger className="w-20 py-3 rounded-xl border-2">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="6">6</SelectItem>
+                <SelectItem value="9">9</SelectItem>
+                <SelectItem value="12">12</SelectItem>
+                <SelectItem value="15">15</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-gray-500">recipes</span>
+          </div>
         </div>
         
-        <div className="flex items-center space-x-2">
-          <label htmlFor="results-per-page" className="text-sm font-medium text-gray-700 whitespace-nowrap">
-            Initial shown:
-          </label>
-          <Select value={resultsPerPage.toString()} onValueChange={(value) => onResultsPerPageChange(parseInt(value))}>
-            <SelectTrigger className="w-20 py-4 rounded-xl border-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="6">6</SelectItem>
-              <SelectItem value="9">9</SelectItem>
-              <SelectItem value="12">12</SelectItem>
-              <SelectItem value="15">15</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Centered Find Recipes Button */}
+        <div className="flex justify-center">
+          <Button 
+            onClick={onSearch}
+            disabled={ingredients.length === 0 || isLoading}
+            className="bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-10 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed min-w-[220px]"
+          >
+            <Search className="h-5 w-5" />
+            <span className="text-lg">{isLoading ? 'Searching Recipes...' : 'Find Recipes'}</span>
+          </Button>
         </div>
-        
-        <Button 
-          onClick={onSearch}
-          disabled={ingredients.length === 0 || isLoading}
-          className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Search className="h-5 w-5" />
-          <span className="text-lg">{isLoading ? 'Searching Recipes...' : 'Find Recipes'}</span>
-        </Button>
       </div>
     </div>
   );
