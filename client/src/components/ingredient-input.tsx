@@ -195,7 +195,7 @@ export function IngredientInput({
 
   useEffect(() => {
     if (inputValue.length > 0) {
-      const filtered = popularIngredients.filter(ingredient =>
+      const filtered = popularIngredients.filter((ingredient: string) =>
         ingredient.toLowerCase().includes(inputValue.toLowerCase()) &&
         !ingredients.includes(ingredient.toLowerCase())
       ).slice(0, 5);
@@ -346,7 +346,7 @@ export function IngredientInput({
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          {popularIngredients.map((ingredient) => {
+          {popularIngredients.map((ingredient: string) => {
             const isAdded = ingredients.includes(ingredient.toLowerCase());
             const icon = INGREDIENT_ICONS[ingredient] || '🥄';
             return (

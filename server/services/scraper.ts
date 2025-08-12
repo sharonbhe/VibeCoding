@@ -457,7 +457,7 @@ class RecipeScraper {
       'lebanese': 'middle eastern',
       'egyptian': 'middle eastern',
       'tunisian': 'middle eastern',
-      'jamaican': 'american',
+      'jamaican': 'caribbean', // Fixed: Jamaican is Caribbean, not American
       'canadian': 'american',
       'croatian': 'mediterranean',
       'dutch': 'german',
