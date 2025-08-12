@@ -74,14 +74,14 @@ export function RecipeCard({ recipe, userIngredients }: RecipeCardProps) {
         </h4>
         
         <div className="flex flex-wrap gap-1 mb-3">
-          {recipe.ingredients.slice(0, 6).map((ingredient) => {
+          {recipe.ingredients.slice(0, 6).map((ingredient, index) => {
             const isMatched = normalizedUserIngredients.some(userIng => 
               ingredient.toLowerCase().includes(userIng) || userIng.includes(ingredient.toLowerCase())
             );
             
             return (
               <Badge 
-                key={ingredient}
+                key={`${ingredient}-${index}`}
                 variant="secondary"
                 className={`px-2 py-1 text-xs rounded-full font-medium ${
                   isMatched 

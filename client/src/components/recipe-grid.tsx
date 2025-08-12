@@ -53,7 +53,7 @@ export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSort
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-xl font-semibold text-gray-900">
-            Showing {recipes.length} of {totalRecipes || recipes.length} recipe{(totalRecipes || recipes.length) !== 1 ? 's' : ''}
+            Showing {visibleRecipes.length} of {totalRecipes || recipes.length} recipe{(totalRecipes || recipes.length) !== 1 ? 's' : ''}
           </h3>
           <p className="text-sm text-gray-600 mt-1">
             Showing recipes that match your ingredients
