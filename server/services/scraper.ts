@@ -515,13 +515,18 @@ class RecipeScraper {
     const recipes: Recipe[] = [];
 
     for (const scraped of scrapedRecipes) {
+      console.log(`\n🍽️ Processing recipe: "${scraped.title}"`);
+      console.log(`   Original ingredients: [${scraped.ingredients.join(', ')}]`);
+      
       // Ensure all searched ingredients are represented in the recipe
       const enhancedIngredients = this.ensureSearchedIngredientsIncluded(
         scraped.ingredients, 
         userIngredients
       );
       
+      console.log(`   Enhanced ingredients: [${enhancedIngredients.join(', ')}]`);
       const matchPercentage = this.calculateMatchPercentage(userIngredients, enhancedIngredients);
+      console.log(`   Match percentage: ${matchPercentage}%`);
       
       const insertRecipe: InsertRecipe = {
         title: scraped.title,
@@ -557,21 +562,18 @@ class RecipeScraper {
       const normalizedUserIngredient = userIngredient.toLowerCase().trim();
       
       // Check if this user ingredient is already represented in recipe ingredients
-      const isAlreadyIncluded = normalizedRecipeIngredients.some(recipeIng => {
+      const matchingIngredient = normalizedRecipeIngredients.find(recipeIng => {
         // Check for exact matches or partial matches
         const isMatch = recipeIng.includes(normalizedUserIngredient) || 
                        normalizedUserIngredient.includes(recipeIng) ||
                        this.areIngredientsRelated(normalizedUserIngredient, recipeIng);
-        
-        if (isMatch) {
-          console.log(`✓ Found match for "${userIngredient}": "${recipeIng}"`);
-        }
         return isMatch;
       });
       
-      // If not found, add the user ingredient to ensure it's represented
-      if (!isAlreadyIncluded) {
-        console.log(`⚠️ Adding missing ingredient "${userIngredient}" to recipe ingredients`);
+      if (matchingIngredient) {
+        console.log(`     ✓ Found match for "${userIngredient}": "${matchingIngredient}"`);
+      } else {
+        console.log(`     ⚠️ Adding missing ingredient "${userIngredient}" to recipe`);
         enhancedIngredients.unshift(userIngredient); // Add to beginning to show it's a key ingredient
       }
     }
