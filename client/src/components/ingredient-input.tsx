@@ -50,11 +50,8 @@ function PreferencesDialog({ popularIngredients, onUpdate }: {
   const updatePreferencesMutation = useMutation({
     mutationFn: async (ingredients: string[]) => {
       try {
-        const response = await apiRequest('/api/preferences', {
-          method: 'POST',
-          body: { popularIngredients: ingredients }
-        });
-        return response;
+        const response = await apiRequest('POST', '/api/preferences', { popularIngredients: ingredients });
+        return await response.json();
       } catch (error) {
         console.error('Mutation error:', error);
         throw error;
