@@ -23,17 +23,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Filter by cuisine if specified
       let filteredRecipes = scrapedRecipes;
       if (cuisine && cuisine !== 'all') {
-        console.log(`🔍 Looking for cuisine: "${cuisine}"`);
-        console.log('Recipe cuisines found:', scrapedRecipes.map(r => `"${r.title}": "${r.cuisine}"`));
-        
         filteredRecipes = scrapedRecipes.filter(recipe => 
           recipe.cuisine?.toLowerCase() === cuisine.toLowerCase()
         );
         
         console.log(`🍽️ Filtered from ${scrapedRecipes.length} to ${filteredRecipes.length} recipes for cuisine: ${cuisine}`);
-        if (filteredRecipes.length === 0) {
-          console.log('❌ No matches found. Available cuisines:', [...new Set(scrapedRecipes.map(r => r.cuisine))]);
-        }
       }
       
       // Sort recipes based on the requested criteria

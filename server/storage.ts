@@ -69,6 +69,7 @@ export class MemStorage implements IStorage {
       prepTime: insertRecipe.prepTime || null,
       isTimeEstimated: insertRecipe.isTimeEstimated ?? true,
       difficulty: insertRecipe.difficulty || null,
+      cuisine: insertRecipe.cuisine || null, // Add the missing cuisine field
       rating: insertRecipe.rating || null,
       sourceUrl: insertRecipe.sourceUrl,
       imageUrl: insertRecipe.imageUrl || null,
