@@ -24,10 +24,13 @@ export default function Home() {
     },
     onSuccess: (data) => {
       setRecipes(data.recipes);
-      toast({
-        title: "Search completed!",
-        description: `Found ${data.recipes.length} recipe${data.recipes.length !== 1 ? 's' : ''} matching your ingredients.`,
-      });
+      // Only show success toast if recipes were found
+      if (data.recipes.length > 0) {
+        toast({
+          title: "Search completed!",
+          description: `Found ${data.recipes.length} recipe${data.recipes.length !== 1 ? 's' : ''} matching your ingredients.`,
+        });
+      }
     },
     onError: (error) => {
       console.error('Search error:', error);
@@ -146,7 +149,7 @@ export default function Home() {
       </section>
 
       {/* Results Section */}
-      {(recipes.length > 0 || searchMutation.isPending) && (
+      {(recipes.length > 0 || searchMutation.isPending || searchMutation.isSuccess) && (
         <section className="py-8">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <RecipeGrid
