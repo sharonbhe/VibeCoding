@@ -23,8 +23,94 @@ class RecipeScraper {
   // TheMealDB API base URL
   private readonly MEAL_DB_API = "https://www.themealdb.com/api/json/v1/1";
 
-  // Backup mock recipes in case API fails
+  // Comprehensive mock recipes database for ingredients with limited API coverage
   private mockRecipes: ScrapedRecipe[] = [
+    // Corn-based recipes
+    {
+      title: "Mexican Street Corn Salad",
+      description: "Fresh corn kernels mixed with lime, cilantro, and spices for a zesty side dish.",
+      ingredients: ["corn", "lime", "cilantro", "mayonnaise", "chili powder", "cotija cheese", "garlic"],
+      instructions: "1. Cook corn and let cool. 2. Mix with lime juice, mayo, and spices. 3. Top with cheese and cilantro. 4. Serve chilled.",
+      prepTime: 15,
+      difficulty: "easy",
+      cuisine: "mexican",
+      rating: 4.7,
+      sourceUrl: "https://example-recipe-site.com/mexican-street-corn",
+      imageUrl: "https://images.unsplash.com/photo-1551024506-0bccd828d307"
+    },
+    {
+      title: "Corn and Black Bean Quesadillas",
+      description: "Crispy tortillas filled with sweet corn, black beans, and melted cheese.",
+      ingredients: ["corn", "black beans", "cheese", "tortillas", "onion", "cumin", "lime"],
+      instructions: "1. Sauté corn and onions. 2. Mix with beans and spices. 3. Fill tortillas with mixture and cheese. 4. Cook until crispy and cheese melts.",
+      prepTime: 20,
+      difficulty: "easy",
+      cuisine: "mexican",
+      rating: 4.6,
+      sourceUrl: "https://example-recipe-site.com/corn-quesadillas",
+      imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b"
+    },
+    {
+      title: "Creamy Corn Chowder",
+      description: "Rich and hearty soup with sweet corn, potatoes, and herbs in a creamy base.",
+      ingredients: ["corn", "potatoes", "onion", "celery", "cream", "butter", "thyme", "bay leaves"],
+      instructions: "1. Sauté vegetables in butter. 2. Add potatoes and broth, simmer. 3. Add corn and cream. 4. Season and simmer until thick.",
+      prepTime: 35,
+      difficulty: "medium",
+      cuisine: "american",
+      rating: 4.8,
+      sourceUrl: "https://example-recipe-site.com/corn-chowder",
+      imageUrl: "https://images.unsplash.com/photo-1547592180-85f173990554"
+    },
+    {
+      title: "Corn Fritters with Honey Butter",
+      description: "Golden crispy fritters made with fresh corn kernels, served with sweet honey butter.",
+      ingredients: ["corn", "flour", "eggs", "milk", "butter", "honey", "baking powder", "salt"],
+      instructions: "1. Mix dry ingredients. 2. Combine wet ingredients and corn. 3. Fry spoonfuls until golden. 4. Serve with honey butter.",
+      prepTime: 25,
+      difficulty: "medium",
+      cuisine: "american",
+      rating: 4.5,
+      sourceUrl: "https://example-recipe-site.com/corn-fritters",
+      imageUrl: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32"
+    },
+    // Enhanced chicken recipes
+    {
+      title: "Honey Garlic Chicken Thighs",
+      description: "Juicy chicken thighs glazed with a sweet and savory honey garlic sauce.",
+      ingredients: ["chicken", "honey", "garlic", "soy sauce", "ginger", "olive oil", "rice vinegar"],
+      instructions: "1. Season chicken and sear skin-side down. 2. Flip and add garlic. 3. Mix sauce and pour over chicken. 4. Simmer until glazed.",
+      prepTime: 30,
+      difficulty: "easy",
+      cuisine: "asian",
+      rating: 4.9,
+      sourceUrl: "https://example-recipe-site.com/honey-garlic-chicken",
+      imageUrl: "https://images.unsplash.com/photo-1598515213692-d4eb536b5917"
+    },
+    {
+      title: "Chicken and Rice One-Pot Meal",
+      description: "Complete meal with tender chicken, rice, and vegetables cooked together in one pot.",
+      ingredients: ["chicken", "rice", "onion", "carrots", "peas", "chicken broth", "garlic", "thyme"],
+      instructions: "1. Brown chicken pieces. 2. Add rice and vegetables. 3. Pour in broth and seasonings. 4. Simmer covered until rice is tender.",
+      prepTime: 45,
+      difficulty: "medium",
+      cuisine: "american",
+      rating: 4.7,
+      sourceUrl: "https://example-recipe-site.com/chicken-rice-one-pot",
+      imageUrl: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90"
+    },
+    {
+      title: "Buffalo Chicken Stuffed Peppers",
+      description: "Bell peppers stuffed with spicy buffalo chicken and rice mixture, topped with cheese.",
+      ingredients: ["chicken", "bell peppers", "rice", "buffalo sauce", "cheese", "celery", "onion"],
+      instructions: "1. Cook chicken and shred. 2. Mix with rice, sauce, and vegetables. 3. Stuff peppers and top with cheese. 4. Bake until peppers are tender.",
+      prepTime: 40,
+      difficulty: "medium",
+      cuisine: "american",
+      rating: 4.6,
+      sourceUrl: "https://example-recipe-site.com/buffalo-chicken-peppers",
+      imageUrl: "https://images.unsplash.com/photo-1604909052743-94e838986d24"
+    },
     {
       title: "Mediterranean Zucchini Tomato Gratin",
       description: "A delicious layered gratin featuring fresh zucchini and ripe tomatoes, seasoned with Mediterranean herbs.",
@@ -32,6 +118,7 @@ class RecipeScraper {
       instructions: "1. Slice zucchini and tomatoes. 2. Layer in baking dish. 3. Drizzle with olive oil. 4. Bake at 375°F for 25 minutes.",
       prepTime: 25,
       difficulty: "easy",
+      cuisine: "mediterranean",
       rating: 4.8,
       sourceUrl: "https://example-recipe-site.com/zucchini-gratin",
       imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b"
@@ -235,7 +322,7 @@ class RecipeScraper {
     const normalized = ingredient.toLowerCase().trim();
     const variations = [normalized];
     
-    // Handle common ingredient variations
+    // Handle common ingredient variations and aliases
     const ingredientMap: { [key: string]: string[] } = {
       'tomatoes': ['tomato', 'tomatoes'],
       'tomato': ['tomato', 'tomatoes'],
@@ -249,9 +336,14 @@ class RecipeScraper {
       'carrot': ['carrot', 'carrots'],
       'peppers': ['pepper', 'peppers', 'bell pepper'],
       'pepper': ['pepper', 'peppers', 'bell pepper'],
-      'chicken': ['chicken', 'chicken breast'],
-      'beef': ['beef', 'ground beef'],
-      'pork': ['pork', 'pork chops'],
+      'chicken': ['chicken', 'chicken breast', 'chicken thigh'],
+      'beef': ['beef', 'ground beef', 'steak'],
+      'pork': ['pork', 'pork chops', 'bacon'],
+      'corn': ['corn', 'sweetcorn', 'sweet corn', 'corn kernels'],
+      'rice': ['rice', 'white rice', 'brown rice'],
+      'pasta': ['pasta', 'spaghetti', 'noodles'],
+      'beans': ['beans', 'black beans', 'kidney beans', 'green beans'],
+      'cheese': ['cheese', 'cheddar', 'mozzarella', 'parmesan']
     };
     
     if (ingredientMap[normalized]) {
