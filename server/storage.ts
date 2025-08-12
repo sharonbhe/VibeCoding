@@ -1,4 +1,4 @@
-import { type Recipe, type InsertRecipe, type Search, type InsertSearch } from "@shared/schema";
+import { type Recipe, type InsertRecipe, type Search, type InsertSearch, type UserPreferences, type InsertUserPreferences } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -12,15 +12,21 @@ export interface IStorage {
   // Search methods
   createSearch(search: InsertSearch): Promise<Search>;
   getRecentSearches(limit?: number): Promise<Search[]>;
+
+  // User preference methods
+  getUserPreferences(userId?: string): Promise<UserPreferences | undefined>;
+  updateUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences>;
 }
 
 export class MemStorage implements IStorage {
   private recipes: Map<string, Recipe>;
   private searches: Map<string, Search>;
+  private userPreferences: Map<string, UserPreferences>;
 
   constructor() {
     this.recipes = new Map();
     this.searches = new Map();
+    this.userPreferences = new Map();
     console.log('🗄️ Initialized fresh storage');
   }
 
@@ -96,6 +102,27 @@ export class MemStorage implements IStorage {
     return Array.from(this.searches.values())
       .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
       .slice(0, limit);
+  }
+
+  async getUserPreferences(userId: string = "default"): Promise<UserPreferences | undefined> {
+    return this.userPreferences.get(userId);
+  }
+
+  async updateUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences> {
+    const userId = preferences.userId || "default";
+    const id = randomUUID();
+    const timestamp = new Date().toISOString();
+    
+    const userPrefs: UserPreferences = {
+      id,
+      userId,
+      popularIngredients: preferences.popularIngredients || [],
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    
+    this.userPreferences.set(userId, userPrefs);
+    return userPrefs;
   }
 }
 

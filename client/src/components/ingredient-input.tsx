@@ -1,9 +1,14 @@
 import { useState, KeyboardEvent, useRef, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Search, Plus, ChefHat } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { X, Search, Plus, ChefHat, Settings } from "lucide-react";
+import { DEFAULT_POPULAR_INGREDIENTS, ALL_AVAILABLE_INGREDIENTS } from "@shared/schema";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface IngredientInputProps {
   ingredients: string[];
@@ -14,27 +19,142 @@ interface IngredientInputProps {
   onResultsPerPageChange: (value: number) => void;
 }
 
-// Popular ingredients for suggestions
-const POPULAR_INGREDIENTS = [
-  'chicken', 'beef', 'pork', 'fish', 'salmon', 'shrimp',
-  'pasta', 'rice', 'noodles', 'bread', 'flour',
-  'tomatoes', 'onions', 'garlic', 'potatoes', 'carrots', 'bell peppers',
-  'zucchini', 'broccoli', 'spinach', 'mushrooms', 'corn', 'peas',
-  'cheese', 'milk', 'eggs', 'butter', 'olive oil',
-  'lemon', 'lime', 'herbs', 'basil', 'parsley', 'cilantro',
-  'beans', 'lentils', 'chickpeas', 'quinoa', 'oats'
-];
+// Icon mapping for popular ingredients
+const INGREDIENT_ICONS: { [key: string]: string } = {
+  'chicken': '🐔', 'beef': '🥩', 'pork': '🥓', 'eggs': '🥚', 'cheese': '🧀',
+  'tomatoes': '🍅', 'onions': '🧅', 'garlic': '🧄', 'potatoes': '🥔',
+  'rice': '🍚', 'pasta': '🍝', 'olive oil': '🫒', 'fish': '🐟',
+  'salmon': '🍣', 'shrimp': '🦐', 'turkey': '🦃', 'bacon': '🥓',
+  'milk': '🥛', 'butter': '🧈', 'yogurt': '🥛', 'cream': '🥛',
+  'carrots': '🥕', 'bell peppers': '🫑', 'zucchini': '🥒', 'broccoli': '🥦',
+  'spinach': '🥬', 'mushrooms': '🍄', 'corn': '🌽', 'peas': '🟢',
+  'lettuce': '🥬', 'cucumber': '🥒', 'noodles': '🍜', 'bread': '🍞',
+  'flour': '🌾', 'quinoa': '🌾', 'oats': '🌾', 'barley': '🌾',
+  'vegetable oil': '🫒', 'coconut oil': '🥥', 'vinegar': '🍶',
+  'soy sauce': '🍶', 'herbs': '🌿', 'basil': '🌿', 'parsley': '🌿',
+  'cilantro': '🌿', 'oregano': '🌿', 'thyme': '🌿', 'rosemary': '🌿',
+  'beans': '🫘', 'lentils': '🫘', 'chickpeas': '🫘', 'tofu': '🧈',
+  'nuts': '🥜', 'seeds': '🌰', 'lemon': '🍋', 'lime': '🟢',
+  'apple': '🍎', 'banana': '🍌', 'ginger': '🫚', 'chili': '🌶️', 'avocado': '🥑'
+};
 
-const QUICK_ADD_SUGGESTIONS = [
-  { name: 'chicken', icon: '🐔' },
-  { name: 'tomatoes', icon: '🍅' },
-  { name: 'onions', icon: '🧅' },
-  { name: 'garlic', icon: '🧄' },
-  { name: 'pasta', icon: '🍝' },
-  { name: 'rice', icon: '🍚' },
-  { name: 'cheese', icon: '🧀' },
-  { name: 'eggs', icon: '🥚' }
-];
+// Preferences Dialog Component
+function PreferencesDialog({ popularIngredients, onUpdate }: { 
+  popularIngredients: string[]; 
+  onUpdate: () => void;
+}) {
+  const [selectedIngredients, setSelectedIngredients] = useState<string[]>(popularIngredients);
+  const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
+
+  const updatePreferencesMutation = useMutation({
+    mutationFn: (ingredients: string[]) => 
+      apiRequest('/api/preferences', {
+        method: 'POST',
+        body: { popularIngredients: ingredients }
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/preferences'] });
+      toast({
+        title: "Preferences updated",
+        description: "Your popular ingredients have been saved."
+      });
+      setIsOpen(false);
+      onUpdate();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update preferences. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleToggleIngredient = (ingredient: string) => {
+    setSelectedIngredients(prev => {
+      if (prev.includes(ingredient)) {
+        return prev.filter(i => i !== ingredient);
+      } else if (prev.length < 12) {
+        return [...prev, ingredient];
+      }
+      return prev;
+    });
+  };
+
+  const handleSave = () => {
+    if (selectedIngredients.length === 12) {
+      updatePreferencesMutation.mutate(selectedIngredients);
+    }
+  };
+
+  const handleReset = () => {
+    setSelectedIngredients(DEFAULT_POPULAR_INGREDIENTS);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="h-8 px-2">
+          <Settings className="h-3 w-3 mr-1" />
+          Customize
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Customize Popular Ingredients</DialogTitle>
+          <p className="text-sm text-gray-600">
+            Choose exactly 12 ingredients to display as your popular ingredients. 
+            Selected: {selectedIngredients.length}/12
+          </p>
+        </DialogHeader>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">
+          {ALL_AVAILABLE_INGREDIENTS.map((ingredient) => {
+            const isSelected = selectedIngredients.includes(ingredient);
+            const icon = INGREDIENT_ICONS[ingredient] || '🥄';
+            
+            return (
+              <button
+                key={ingredient}
+                onClick={() => handleToggleIngredient(ingredient)}
+                disabled={!isSelected && selectedIngredients.length >= 12}
+                className={`flex items-center space-x-2 p-3 rounded-lg text-sm transition-colors ${
+                  isSelected
+                    ? 'bg-primary text-white'
+                    : selectedIngredients.length >= 12
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                }`}
+              >
+                <span>{icon}</span>
+                <span className="capitalize truncate">{ingredient}</span>
+                {isSelected && <span className="text-xs">✓</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex justify-between items-center mt-6 pt-4 border-t">
+          <Button variant="outline" onClick={handleReset}>
+            Reset to Default
+          </Button>
+          <div className="flex space-x-2">
+            <Button variant="outline" onClick={() => setIsOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSave} 
+              disabled={selectedIngredients.length !== 12 || updatePreferencesMutation.isPending}
+            >
+              {updatePreferencesMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export function IngredientInput({ 
   ingredients, 
@@ -49,9 +169,17 @@ export function IngredientInput({
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Fetch user preferences for popular ingredients
+  const { data: preferencesData } = useQuery({
+    queryKey: ['/api/preferences'],
+    select: (data: any) => data.popularIngredients || DEFAULT_POPULAR_INGREDIENTS
+  });
+
+  const popularIngredients = preferencesData || DEFAULT_POPULAR_INGREDIENTS;
+
   useEffect(() => {
     if (inputValue.length > 0) {
-      const filtered = POPULAR_INGREDIENTS.filter(ingredient =>
+      const filtered = popularIngredients.filter(ingredient =>
         ingredient.toLowerCase().includes(inputValue.toLowerCase()) &&
         !ingredients.includes(ingredient.toLowerCase())
       ).slice(0, 5);
@@ -60,7 +188,7 @@ export function IngredientInput({
     } else {
       setShowSuggestions(false);
     }
-  }, [inputValue, ingredients]);
+  }, [inputValue, ingredients, popularIngredients]);
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && inputValue.trim()) {
@@ -192,14 +320,23 @@ export function IngredientInput({
 
       {/* Quick Add Buttons */}
       <div className="mb-6">
-        <h4 className="text-sm font-medium text-gray-700 mb-3">Popular ingredients:</h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-medium text-gray-700">Popular ingredients:</h4>
+          <PreferencesDialog 
+            popularIngredients={popularIngredients}
+            onUpdate={() => {
+              queryClient.invalidateQueries({ queryKey: ['/api/preferences'] });
+            }}
+          />
+        </div>
         <div className="flex flex-wrap gap-2">
-          {QUICK_ADD_SUGGESTIONS.map((item) => {
-            const isAdded = ingredients.includes(item.name.toLowerCase());
+          {popularIngredients.map((ingredient) => {
+            const isAdded = ingredients.includes(ingredient.toLowerCase());
+            const icon = INGREDIENT_ICONS[ingredient] || '🥄';
             return (
               <button
-                key={item.name}
-                onClick={() => addIngredient(item.name)}
+                key={ingredient}
+                onClick={() => addIngredient(ingredient)}
                 disabled={isAdded}
                 className={`inline-flex items-center space-x-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                   isAdded 
@@ -207,8 +344,8 @@ export function IngredientInput({
                     : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
                 }`}
               >
-                <span>{item.icon}</span>
-                <span className="capitalize">{item.name}</span>
+                <span>{icon}</span>
+                <span className="capitalize">{ingredient}</span>
                 {isAdded ? (
                   <span className="text-xs">✓</span>
                 ) : (

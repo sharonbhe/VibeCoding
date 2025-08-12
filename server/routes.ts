@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { recipeScraper } from "./services/scraper";
 import { z } from "zod";
-import { type RecipeSearchRequest, type RecipeSearchResponse } from "@shared/schema";
+import { type RecipeSearchRequest, type RecipeSearchResponse, insertUserPreferencesSchema, DEFAULT_POPULAR_INGREDIENTS } from "@shared/schema";
 
 const searchRequestSchema = z.object({
   ingredients: z.array(z.string().min(1)).min(1),
@@ -97,6 +97,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Get searches error:', error);
       res.status(500).json({ message: "Failed to retrieve search history" });
+    }
+  });
+
+  // Get user preferences for popular ingredients
+  app.get("/api/preferences", async (req, res) => {
+    try {
+      const preferences = await storage.getUserPreferences("default");
+      
+      if (!preferences) {
+        // Return default preferences if none exist
+        return res.json({
+          popularIngredients: DEFAULT_POPULAR_INGREDIENTS
+        });
+      }
+      
+      res.json({
+        popularIngredients: preferences.popularIngredients
+      });
+    } catch (error) {
+      console.error('Get preferences error:', error);
+      res.status(500).json({ message: "Failed to retrieve preferences" });
+    }
+  });
+
+  // Update user preferences for popular ingredients
+  app.post("/api/preferences", async (req, res) => {
+    try {
+      const validatedData = insertUserPreferencesSchema.parse(req.body);
+      
+      // Ensure we have exactly 12 ingredients
+      if (validatedData.popularIngredients && validatedData.popularIngredients.length !== 12) {
+        return res.status(400).json({ 
+          message: "Popular ingredients must contain exactly 12 items" 
+        });
+      }
+      
+      const preferences = await storage.updateUserPreferences({
+        userId: "default",
+        popularIngredients: validatedData.popularIngredients || DEFAULT_POPULAR_INGREDIENTS
+      });
+      
+      res.json({
+        popularIngredients: preferences.popularIngredients
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid request", 
+          errors: error.errors 
+        });
+      }
+      
+      console.error('Update preferences error:', error);
+      res.status(500).json({ message: "Failed to update preferences" });
     }
   });
 
