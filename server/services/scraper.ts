@@ -244,15 +244,13 @@ class RecipeScraper {
       const mealDBRecipes = await this.fetchFromMealDB(ingredients);
       allRecipes.push(...mealDBRecipes);
       
-      // 2. Recipe Puppy (free, large database)
-      const recipePuppyRecipes = await this.fetchFromRecipePuppy(ingredients);
-      allRecipes.push(...recipePuppyRecipes);
+      // 2. Recipe Puppy API is deprecated, skip it
+      // const recipePuppyRecipes = await this.fetchFromRecipePuppy(ingredients);
+      // allRecipes.push(...recipePuppyRecipes);
       
-      // 3. Add more sources if we still need recipes
-      if (allRecipes.length < 20) {
-        const additionalRecipes = await this.generateContextualRecipes(ingredients);
-        allRecipes.push(...additionalRecipes);
-      }
+      // 3. Always add contextual recipes to increase variety
+      const additionalRecipes = await this.generateContextualRecipes(ingredients);
+      allRecipes.push(...additionalRecipes);
       
       console.log('📡 Fetched', allRecipes.length, 'total recipes from all sources');
       
@@ -710,8 +708,8 @@ class RecipeScraper {
           difficulty: template.difficulty,
           cuisine: template.cuisine,
           rating: Math.round((Math.random() * 1.5 + 3.5) * 10) / 10,
-          sourceUrl: 'https://example-recipe-site.com',
-          imageUrl: 'https://images.unsplash.com/photo-1546548970-71785318a17b'
+          sourceUrl: `https://www.allrecipes.com/search/results/?search=${encodeURIComponent(template.name)}`,
+          imageUrl: this.getRecipeImageUrl(template.name, template.cuisine)
         });
       }
     }
@@ -752,6 +750,44 @@ class RecipeScraper {
     if (ingredientText.includes('coconut milk') || ingredientText.includes('lemongrass') || ingredientText.includes('fish sauce')) return 'thai';
     
     return 'american';
+  }
+
+  private getRecipeImageUrl(recipeName: string, cuisine: string): string {
+    // Map recipe types to appropriate Unsplash food images
+    const imageMap: { [key: string]: string } = {
+      'stir fry': 'photo-1512058564366-18510be2db19', // Asian stir fry
+      'tacos': 'photo-1565299585323-38174c6e3634', // Mexican tacos
+      'curry': 'photo-1588166524941-3bf61a9c41db', // Indian curry
+      'pizza': 'photo-1513104890138-7c749659a591', // Pizza
+      'salad': 'photo-1540189549336-e6e99c3679fe', // Fresh salad
+      'soup': 'photo-1547592180-85f173990554', // Soup bowl
+      'chowder': 'photo-1547592180-85f173990554', // Soup/chowder
+      'fritters': 'photo-1599599810769-bcde5a160d32', // Fried food
+      'fajitas': 'photo-1565299585323-38174c6e3634', // Mexican food
+      'street corn': 'photo-1551024506-0bccd828d307', // Corn
+      'pie': 'photo-1568596835359-d537bcb80c60' // Pie/baked dish
+    };
+
+    const recipeLower = recipeName.toLowerCase();
+    
+    // Find matching image based on recipe name
+    for (const [key, imageId] of Object.entries(imageMap)) {
+      if (recipeLower.includes(key)) {
+        return `https://images.unsplash.com/${imageId}`;
+      }
+    }
+
+    // Cuisine-based fallback images
+    const cuisineImages: { [key: string]: string } = {
+      'chinese': 'photo-1512058564366-18510be2db19',
+      'mexican': 'photo-1565299585323-38174c6e3634', 
+      'indian': 'photo-1588166524941-3bf61a9c41db',
+      'italian': 'photo-1513104890138-7c749659a591',
+      'thai': 'photo-1562565652-a0d8f0c59eb4',
+      'american': 'photo-1546548970-71785318a17b'
+    };
+
+    return `https://images.unsplash.com/${cuisineImages[cuisine] || cuisineImages['american']}`;
   }
 }
 
