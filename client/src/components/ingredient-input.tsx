@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { X, Search, Plus, ChefHat, Settings } from "lucide-react";
 import { DEFAULT_POPULAR_INGREDIENTS, ALL_AVAILABLE_INGREDIENTS } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -48,11 +48,18 @@ function PreferencesDialog({ popularIngredients, onUpdate }: {
   const { toast } = useToast();
 
   const updatePreferencesMutation = useMutation({
-    mutationFn: (ingredients: string[]) => 
-      apiRequest('/api/preferences', {
-        method: 'POST',
-        body: { popularIngredients: ingredients }
-      }),
+    mutationFn: async (ingredients: string[]) => {
+      try {
+        const response = await apiRequest('/api/preferences', {
+          method: 'POST',
+          body: { popularIngredients: ingredients }
+        });
+        return response;
+      } catch (error) {
+        console.error('Mutation error:', error);
+        throw error;
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/preferences'] });
       toast({
@@ -62,7 +69,8 @@ function PreferencesDialog({ popularIngredients, onUpdate }: {
       setIsOpen(false);
       onUpdate();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Update preferences error:', error);
       toast({
         title: "Error",
         description: "Failed to update preferences. Please try again.",
@@ -84,7 +92,14 @@ function PreferencesDialog({ popularIngredients, onUpdate }: {
 
   const handleSave = () => {
     if (selectedIngredients.length === 12) {
+      console.log('Saving ingredients:', selectedIngredients);
       updatePreferencesMutation.mutate(selectedIngredients);
+    } else {
+      toast({
+        title: "Invalid selection",
+        description: `Please select exactly 12 ingredients. Currently selected: ${selectedIngredients.length}`,
+        variant: "destructive"
+      });
     }
   };
 
@@ -103,10 +118,10 @@ function PreferencesDialog({ popularIngredients, onUpdate }: {
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Customize Popular Ingredients</DialogTitle>
-          <p className="text-sm text-gray-600">
+          <DialogDescription>
             Choose exactly 12 ingredients to display as your popular ingredients. 
             Selected: {selectedIngredients.length}/12
-          </p>
+          </DialogDescription>
         </DialogHeader>
         
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">

@@ -27,9 +27,10 @@ Preferred communication style: Simple, everyday language.
 - **Storage Layer**: Abstracted storage interface with in-memory fallback for development
 
 ### Data Storage Solutions
-- **Primary Database**: PostgreSQL with two main tables:
+- **Primary Database**: PostgreSQL with three main tables:
   - `recipes`: Stores recipe data including ingredients, instructions, prep time, difficulty, and rating
   - `searches`: Logs user searches with ingredients and results for analytics
+  - `userPreferences`: Stores customizable popular ingredients (12 selected from 50+ available)
 - **Schema Management**: Drizzle Kit for database migrations and schema evolution
 - **Type Safety**: Drizzle-Zod integration for runtime validation of database operations
 
@@ -91,3 +92,7 @@ Preferred communication style: Simple, everyday language.
 - ✓ Created deployment preparation script to handle static file path mismatch
 - ✓ Added detailed error handling with helpful deployment instructions
 - ✓ Enhanced production environment checks and validation
+- ✓ Added user preferences system for customizable popular ingredients (August 2025)
+- ✓ Expanded ingredient library to 50+ options with 12 customizable popular ingredients
+- ✓ Created preferences dialog with visual ingredient selection interface
+- ✓ Implemented persistent user preferences storage with API endpoints
