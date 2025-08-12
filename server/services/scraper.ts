@@ -582,10 +582,10 @@ class RecipeScraper {
   }
 
   private areIngredientsRelated(ingredient1: string, ingredient2: string): boolean {
-    // Define ingredient relationships/aliases
+    // Define ingredient relationships/aliases - only for truly similar ingredients
     const relationships: { [key: string]: string[] } = {
-      'tomato': ['tomatoes', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'tomato paste', 'tomato sauce', 'tomato puree', 'diced tomatoes', 'canned tomatoes'],
-      'tomatoes': ['tomato', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'tomato paste', 'tomato sauce', 'tomato puree', 'diced tomatoes', 'canned tomatoes'],
+      'tomato': ['tomatoes', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'diced tomatoes', 'canned tomatoes'],
+      'tomatoes': ['tomato', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'diced tomatoes', 'canned tomatoes'],
       'chicken': ['chicken breast', 'chicken thigh', 'chicken legs', 'chicken wings', 'whole chicken'],
       'beef': ['ground beef', 'beef steak', 'beef roast', 'beef chuck', 'steak'],
       'onion': ['onions', 'red onion', 'white onion', 'yellow onion', 'sweet onion'],
