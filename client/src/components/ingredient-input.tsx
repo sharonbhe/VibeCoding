@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { X, Search, Plus, ChefHat, Settings } from "lucide-react";
-import { DEFAULT_POPULAR_INGREDIENTS, ALL_AVAILABLE_INGREDIENTS } from "@shared/schema";
+import { DEFAULT_POPULAR_INGREDIENTS, ALL_AVAILABLE_INGREDIENTS, CUISINE_TYPES } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,6 +17,8 @@ interface IngredientInputProps {
   isLoading?: boolean;
   resultsPerPage: number;
   onResultsPerPageChange: (value: number) => void;
+  selectedCuisine: string;
+  onCuisineChange: (cuisine: string) => void;
 }
 
 // Icon mapping for popular ingredients
@@ -174,7 +176,9 @@ export function IngredientInput({
   onSearch, 
   isLoading = false,
   resultsPerPage,
-  onResultsPerPageChange
+  onResultsPerPageChange,
+  selectedCuisine,
+  onCuisineChange
 }: IngredientInputProps) {
   const [inputValue, setInputValue] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -370,6 +374,24 @@ export function IngredientInput({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex items-center space-x-2">
+          <label htmlFor="cuisine-select" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            Cuisine:
+          </label>
+          <Select value={selectedCuisine} onValueChange={onCuisineChange}>
+            <SelectTrigger className="w-32 py-4 rounded-xl border-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CUISINE_TYPES.map((cuisine) => (
+                <SelectItem key={cuisine} value={cuisine}>
+                  {cuisine === 'all' ? 'All Cuisines' : cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
         <div className="flex items-center space-x-2">
           <label htmlFor="results-per-page" className="text-sm font-medium text-gray-700 whitespace-nowrap">
             Initial shown:

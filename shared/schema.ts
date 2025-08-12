@@ -12,6 +12,7 @@ export const recipes = pgTable("recipes", {
   prepTime: integer("prep_time"), // in minutes
   isTimeEstimated: integer("is_time_estimated", { mode: 'boolean' }).default(true), // true if time is estimated, false if from recipe
   difficulty: text("difficulty"), // easy, medium, hard
+  cuisine: text("cuisine"), // cuisine type like 'italian', 'chinese', 'mexican', etc.
   rating: real("rating"),
   sourceUrl: text("source_url").notNull(),
   imageUrl: text("image_url"),
@@ -59,6 +60,7 @@ export type UserPreferences = typeof userPreferences.$inferSelect;
 export type RecipeSearchRequest = {
   ingredients: string[];
   sortBy?: 'match' | 'time' | 'difficulty' | 'rating';
+  cuisine?: string;
 };
 
 export type RecipeSearchResponse = {
@@ -83,4 +85,11 @@ export const ALL_AVAILABLE_INGREDIENTS = [
   'herbs', 'basil', 'parsley', 'cilantro', 'oregano', 'thyme', 'rosemary',
   'beans', 'lentils', 'chickpeas', 'tofu', 'nuts', 'seeds',
   'lemon', 'lime', 'apple', 'banana', 'ginger', 'chili', 'avocado'
+];
+
+// Available cuisine types
+export const CUISINE_TYPES = [
+  'all', 'italian', 'chinese', 'mexican', 'indian', 'thai', 'french', 'japanese', 
+  'mediterranean', 'american', 'greek', 'spanish', 'korean', 'middle eastern', 
+  'german', 'british', 'vietnamese', 'moroccan'
 ];

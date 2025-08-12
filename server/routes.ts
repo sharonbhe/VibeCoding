@@ -7,20 +7,29 @@ import { type RecipeSearchRequest, type RecipeSearchResponse, insertUserPreferen
 
 const searchRequestSchema = z.object({
   ingredients: z.array(z.string().min(1)).min(1),
-  sortBy: z.enum(['match', 'time', 'difficulty', 'rating']).optional().default('match')
+  sortBy: z.enum(['match', 'time', 'difficulty', 'rating']).optional().default('match'),
+  cuisine: z.string().optional()
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Search for recipes based on ingredients
   app.post("/api/recipes/search", async (req, res) => {
     try {
-      const { ingredients, sortBy } = searchRequestSchema.parse(req.body);
+      const { ingredients, sortBy, cuisine } = searchRequestSchema.parse(req.body);
       
       // Scrape recipes from external sources
       const scrapedRecipes = await recipeScraper.scrapeRecipes(ingredients);
       
+      // Filter by cuisine if specified
+      let filteredRecipes = scrapedRecipes;
+      if (cuisine && cuisine !== 'all') {
+        filteredRecipes = scrapedRecipes.filter(recipe => 
+          recipe.cuisine?.toLowerCase() === cuisine.toLowerCase()
+        );
+      }
+      
       // Sort recipes based on the requested criteria
-      let sortedRecipes = [...scrapedRecipes];
+      let sortedRecipes = [...filteredRecipes];
       switch (sortBy) {
         case 'match':
           sortedRecipes.sort((a, b) => (b.matchPercentage || 0) - (a.matchPercentage || 0));

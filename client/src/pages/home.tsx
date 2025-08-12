@@ -12,6 +12,7 @@ export default function Home() {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [currentSort, setCurrentSort] = useState<string>('match');
+  const [selectedCuisine, setSelectedCuisine] = useState('all');
   const [resultsPerPage, setResultsPerPage] = useState<number>(9);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -50,7 +51,8 @@ export default function Home() {
 
     searchMutation.mutate({
       ingredients,
-      sortBy: currentSort as 'match' | 'time' | 'difficulty' | 'rating'
+      sortBy: currentSort as 'match' | 'time' | 'difficulty' | 'rating',
+      cuisine: selectedCuisine !== 'all' ? selectedCuisine : undefined
     });
   };
 
@@ -137,6 +139,8 @@ export default function Home() {
             isLoading={searchMutation.isPending}
             resultsPerPage={resultsPerPage}
             onResultsPerPageChange={setResultsPerPage}
+            selectedCuisine={selectedCuisine}
+            onCuisineChange={setSelectedCuisine}
           />
         </div>
       </section>

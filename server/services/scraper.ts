@@ -286,6 +286,9 @@ class RecipeScraper {
     // Determine difficulty based on ingredient count and instruction complexity
     const difficulty = this.estimateDifficulty(ingredients.length, instructions);
 
+    // Detect cuisine from area
+    const cuisine = this.detectCuisine(meal.strArea, meal.strMeal);
+
     return {
       title: meal.strMeal,
       description: `${meal.strArea || 'International'} ${meal.strCategory || 'dish'}`,
@@ -294,6 +297,7 @@ class RecipeScraper {
       prepTime: timeInfo.minutes,
       isTimeEstimated: timeInfo.isEstimated,
       difficulty,
+      cuisine,
       rating: Math.random() * 1.5 + 3.5, // Random rating between 3.5 and 5
       sourceUrl: meal.strSource || `https://www.themealdb.com/meal/${meal.idMeal}`,
       imageUrl: meal.strMealThumb
@@ -425,6 +429,76 @@ class RecipeScraper {
     }
 
     return recipes.sort((a, b) => (b.matchPercentage || 0) - (a.matchPercentage || 0));
+  }
+
+  private detectCuisine(area: string | null, recipeName: string): string {
+    const areaLower = (area || '').toLowerCase();
+    const nameLower = recipeName.toLowerCase();
+
+    // Map TheMealDB areas to our cuisine types
+    const areaMapping: { [key: string]: string } = {
+      'italian': 'italian',
+      'chinese': 'chinese',
+      'mexican': 'mexican',
+      'indian': 'indian',
+      'thai': 'thai',
+      'french': 'french',
+      'japanese': 'japanese',
+      'greek': 'greek',
+      'spanish': 'spanish',
+      'korean': 'korean',
+      'moroccan': 'moroccan',
+      'british': 'british',
+      'american': 'american',
+      'vietnamese': 'vietnamese',
+      'turkish': 'middle eastern',
+      'lebanese': 'middle eastern',
+      'egyptian': 'middle eastern',
+      'tunisian': 'middle eastern',
+      'jamaican': 'american',
+      'canadian': 'american',
+      'croatian': 'mediterranean',
+      'dutch': 'german',
+      'irish': 'british',
+      'polish': 'german',
+      'portuguese': 'mediterranean',
+      'russian': 'german',
+      'ukrainian': 'german'
+    };
+
+    // First try to match by area
+    if (areaLower && areaMapping[areaLower]) {
+      return areaMapping[areaLower];
+    }
+
+    // Then try to detect from recipe name
+    if (nameLower.includes('pasta') || nameLower.includes('risotto') || nameLower.includes('pizza')) {
+      return 'italian';
+    }
+    if (nameLower.includes('curry') || nameLower.includes('naan') || nameLower.includes('tandoori')) {
+      return 'indian';
+    }
+    if (nameLower.includes('taco') || nameLower.includes('burrito') || nameLower.includes('enchilada')) {
+      return 'mexican';
+    }
+    if (nameLower.includes('stir fry') || nameLower.includes('fried rice') || nameLower.includes('wonton')) {
+      return 'chinese';
+    }
+    if (nameLower.includes('pad thai') || nameLower.includes('tom yum') || nameLower.includes('massaman')) {
+      return 'thai';
+    }
+    if (nameLower.includes('sushi') || nameLower.includes('tempura') || nameLower.includes('teriyaki')) {
+      return 'japanese';
+    }
+    if (nameLower.includes('paella') || nameLower.includes('tapas') || nameLower.includes('gazpacho')) {
+      return 'spanish';
+    }
+    if (nameLower.includes('moussaka') || nameLower.includes('souvlaki') || nameLower.includes('tzatziki')) {
+      return 'greek';
+    }
+
+    // Default to the area if it exists, otherwise 'american'
+    return areaLower || 'american';
   }
 }
 
