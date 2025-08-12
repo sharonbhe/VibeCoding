@@ -232,6 +232,7 @@ export function IngredientInput({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   // Fetch user preferences for popular ingredients
   const { data: preferencesData } = useQuery({
@@ -266,11 +267,21 @@ export function IngredientInput({
   // Check if ingredient is valid (exists in our known ingredients list)
   const isValidIngredient = (ingredient: string) => {
     const normalizedIngredient = ingredient.toLowerCase().trim();
-    return ALL_INGREDIENTS.some(validIngredient => 
-      validIngredient.toLowerCase() === normalizedIngredient ||
-      validIngredient.toLowerCase().includes(normalizedIngredient) ||
-      normalizedIngredient.includes(validIngredient.toLowerCase())
-    );
+    console.log('Validating ingredient:', normalizedIngredient);
+    
+    const isValid = ALL_INGREDIENTS.some(validIngredient => {
+      const validNormalized = validIngredient.toLowerCase();
+      const exactMatch = validNormalized === normalizedIngredient;
+      const containsValid = validNormalized.includes(normalizedIngredient);
+      const validContainsInput = normalizedIngredient.includes(validNormalized);
+      
+      console.log(`Checking "${normalizedIngredient}" against "${validNormalized}":`, { exactMatch, containsValid, validContainsInput });
+      
+      return exactMatch || containsValid || validContainsInput;
+    });
+    
+    console.log(`Ingredient "${normalizedIngredient}" is ${isValid ? 'valid' : 'invalid'}`);
+    return isValid;
   };
 
   const addIngredient = (ingredient: string) => {
