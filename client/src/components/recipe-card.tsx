@@ -86,9 +86,45 @@ export function RecipeCard({ recipe, userIngredients }: RecipeCardProps) {
         
         <div className="flex flex-wrap gap-1 mb-3">
           {recipe.ingredients.slice(0, 6).map((ingredient, index) => {
-            const isMatched = normalizedUserIngredients.some(userIng => 
-              ingredient.toLowerCase().includes(userIng) || userIng.includes(ingredient.toLowerCase())
-            );
+            const isMatched = normalizedUserIngredients.some(userIng => {
+              const normalizedIngredient = ingredient.toLowerCase().trim();
+              
+              // Direct matches
+              if (normalizedIngredient.includes(userIng) || userIng.includes(normalizedIngredient)) {
+                return true;
+              }
+              
+              // Enhanced relationship matching for common ingredient types
+              const ingredientRelationships: { [key: string]: string[] } = {
+                'tomato': ['tomatoes', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'tomato paste', 'tomato sauce', 'tomato puree', 'diced tomatoes', 'canned tomatoes', 'sun-dried tomatoes'],
+                'tomatoes': ['tomato', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'tomato paste', 'tomato sauce', 'tomato puree', 'diced tomatoes', 'canned tomatoes', 'sun-dried tomatoes'],
+                'chicken': ['chicken breast', 'chicken thigh', 'chicken legs', 'chicken wings', 'whole chicken', 'chicken stock', 'chicken stock cube'],
+                'beef': ['ground beef', 'beef steak', 'beef roast', 'beef chuck', 'steak'],
+                'onion': ['onions', 'red onion', 'white onion', 'yellow onion', 'sweet onion', 'red onions'],
+                'onions': ['onion', 'red onion', 'white onion', 'yellow onion', 'sweet onion', 'red onions']
+              };
+              
+              // Check if ingredients are related through the relationships map
+              if (ingredientRelationships[userIng]?.some(related => 
+                normalizedIngredient.includes(related.toLowerCase())
+              )) {
+                return true;
+              }
+              
+              if (ingredientRelationships[normalizedIngredient]?.includes(userIng)) {
+                return true;
+              }
+              
+              // Check for word-based matching
+              const userWords = userIng.split(' ');
+              const ingredientWords = normalizedIngredient.split(' ');
+              
+              return userWords.some(userWord => 
+                userWord.length > 3 && ingredientWords.some(ingredientWord => 
+                  ingredientWord.includes(userWord) || userWord.includes(ingredientWord)
+                )
+              );
+            });
             
             return (
               <Badge 
@@ -96,7 +132,7 @@ export function RecipeCard({ recipe, userIngredients }: RecipeCardProps) {
                 variant="secondary"
                 className={`px-2 py-1 text-xs rounded-full font-medium ${
                   isMatched 
-                    ? 'bg-primary/10 text-primary' 
+                    ? 'bg-primary/10 text-primary border-primary/20' 
                     : 'bg-gray-100 text-gray-600'
                 }`}
               >
