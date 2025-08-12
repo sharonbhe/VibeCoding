@@ -87,9 +87,9 @@ export const ALL_AVAILABLE_INGREDIENTS = [
   'lemon', 'lime', 'apple', 'banana', 'ginger', 'chili', 'avocado'
 ];
 
-// Available cuisine types
+// Available cuisine types (sorted alphabetically except 'all' first)
 export const CUISINE_TYPES = [
-  'all', 'italian', 'chinese', 'mexican', 'indian', 'thai', 'french', 'japanese', 
-  'mediterranean', 'american', 'greek', 'spanish', 'korean', 'middle eastern', 
-  'german', 'british', 'vietnamese', 'moroccan'
+  'all', 'american', 'british', 'chinese', 'french', 'german', 'greek', 'indian', 
+  'italian', 'japanese', 'korean', 'mediterranean', 'mexican', 'middle eastern', 
+  'moroccan', 'spanish', 'thai', 'vietnamese'
 ];

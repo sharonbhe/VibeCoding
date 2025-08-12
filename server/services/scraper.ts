@@ -288,6 +288,7 @@ class RecipeScraper {
 
     // Detect cuisine from area
     const cuisine = this.detectCuisine(meal.strArea, meal.strMeal);
+    console.log(`🍽️ Recipe "${meal.strMeal}" (${meal.strArea}) detected as cuisine: ${cuisine}`);
 
     return {
       title: meal.strMeal,
