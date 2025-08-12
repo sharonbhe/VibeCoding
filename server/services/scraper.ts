@@ -263,7 +263,7 @@ class RecipeScraper {
       variations.push(normalized + 's'); // Add 's'
     }
     
-    return [...new Set(variations)]; // Remove duplicates
+    return Array.from(new Set(variations)); // Remove duplicates
   }
 
   private convertMealDBToScraped(meal: any): ScrapedRecipe {
@@ -299,14 +299,47 @@ class RecipeScraper {
   }
 
   private estimatePrepTime(instructions: string): number {
+    const instructionsLower = instructions.toLowerCase();
     const length = instructions.length;
-    const steps = instructions.split('.').length;
+    const steps = instructions.split(/[.!]/).filter(step => step.trim().length > 10).length;
     
-    // Basic estimation based on complexity
-    if (length < 200) return 15;
-    if (length < 400) return 25;
-    if (length < 600) return 35;
-    return Math.min(60, 30 + steps * 2);
+    // Look for explicit time mentions in instructions
+    const timeMatches = instructionsLower.match(/(\d+)\s*(hour|hr|minute|min)/g);
+    if (timeMatches) {
+      let totalMinutes = 0;
+      timeMatches.forEach(match => {
+        const timeValue = parseInt(match.match(/\d+/)?.[0] || '0');
+        if (match.includes('hour') || match.includes('hr')) {
+          totalMinutes += timeValue * 60;
+        } else {
+          totalMinutes += timeValue;
+        }
+      });
+      if (totalMinutes > 0) return Math.min(totalMinutes, 180); // Cap at 3 hours
+    }
+    
+    // Enhanced estimation based on cooking methods and complexity
+    let baseTime = 20;
+    
+    // Adjust for cooking methods that take longer
+    if (instructionsLower.includes('marinate')) baseTime += 30;
+    if (instructionsLower.includes('chill') || instructionsLower.includes('refrigerate')) baseTime += 60;
+    if (instructionsLower.includes('slow cook') || instructionsLower.includes('braise')) baseTime += 90;
+    if (instructionsLower.includes('roast') || instructionsLower.includes('bake')) baseTime += 25;
+    if (instructionsLower.includes('fry') || instructionsLower.includes('deep')) baseTime += 15;
+    if (instructionsLower.includes('simmer')) baseTime += 20;
+    if (instructionsLower.includes('steam')) baseTime += 10;
+    
+    // Adjust for dish complexity
+    const complexWords = ['fold', 'whisk', 'reduce', 'caramelize', 'julienne', 'brunoise', 'tempura', 'karaage'];
+    const complexityBonus = complexWords.filter(word => instructionsLower.includes(word)).length * 10;
+    
+    // Factor in instruction length and number of steps
+    const lengthFactor = Math.min(length / 10, 30); // 1 minute per 10 chars, max 30 minutes
+    const stepFactor = steps * 5; // 5 minutes per step
+    
+    const totalTime = baseTime + complexityBonus + lengthFactor + stepFactor;
+    return Math.min(Math.max(totalTime, 15), 180); // Between 15 minutes and 3 hours
   }
 
   private estimateDifficulty(ingredientCount: number, instructions: string): string {
