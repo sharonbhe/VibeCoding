@@ -559,13 +559,19 @@ class RecipeScraper {
       // Check if this user ingredient is already represented in recipe ingredients
       const isAlreadyIncluded = normalizedRecipeIngredients.some(recipeIng => {
         // Check for exact matches or partial matches
-        return recipeIng.includes(normalizedUserIngredient) || 
-               normalizedUserIngredient.includes(recipeIng) ||
-               this.areIngredientsRelated(normalizedUserIngredient, recipeIng);
+        const isMatch = recipeIng.includes(normalizedUserIngredient) || 
+                       normalizedUserIngredient.includes(recipeIng) ||
+                       this.areIngredientsRelated(normalizedUserIngredient, recipeIng);
+        
+        if (isMatch) {
+          console.log(`✓ Found match for "${userIngredient}": "${recipeIng}"`);
+        }
+        return isMatch;
       });
       
       // If not found, add the user ingredient to ensure it's represented
       if (!isAlreadyIncluded) {
+        console.log(`⚠️ Adding missing ingredient "${userIngredient}" to recipe ingredients`);
         enhancedIngredients.unshift(userIngredient); // Add to beginning to show it's a key ingredient
       }
     }
@@ -576,8 +582,8 @@ class RecipeScraper {
   private areIngredientsRelated(ingredient1: string, ingredient2: string): boolean {
     // Define ingredient relationships/aliases
     const relationships: { [key: string]: string[] } = {
-      'tomato': ['tomatoes', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'tomato paste', 'tomato sauce'],
-      'tomatoes': ['tomato', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'tomato paste', 'tomato sauce'],
+      'tomato': ['tomatoes', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'tomato paste', 'tomato sauce', 'tomato puree', 'diced tomatoes', 'canned tomatoes'],
+      'tomatoes': ['tomato', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'tomato paste', 'tomato sauce', 'tomato puree', 'diced tomatoes', 'canned tomatoes'],
       'chicken': ['chicken breast', 'chicken thigh', 'chicken legs', 'chicken wings', 'whole chicken'],
       'beef': ['ground beef', 'beef steak', 'beef roast', 'beef chuck', 'steak'],
       'onion': ['onions', 'red onion', 'white onion', 'yellow onion', 'sweet onion'],
