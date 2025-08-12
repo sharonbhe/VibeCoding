@@ -131,7 +131,7 @@ export default function Home() {
         <section className="py-8">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <RecipeGrid
-              recipes={recipes.slice(0, resultsPerPage)}
+              recipes={recipes}
               userIngredients={ingredients}
               isLoading={searchMutation.isPending}
               onSortChange={handleSortChange}
