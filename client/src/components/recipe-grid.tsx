@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RecipeCard } from "./recipe-card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,10 +11,16 @@ interface RecipeGridProps {
   isLoading?: boolean;
   onSortChange: (sortBy: string) => void;
   totalRecipes?: number;
+  initialDisplayCount?: number;
 }
 
-export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSortChange, totalRecipes }: RecipeGridProps) {
-  const [displayCount, setDisplayCount] = useState(6);
+export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSortChange, totalRecipes, initialDisplayCount = 6 }: RecipeGridProps) {
+  const [displayCount, setDisplayCount] = useState(initialDisplayCount);
+
+  // Reset display count when initialDisplayCount changes
+  useEffect(() => {
+    setDisplayCount(initialDisplayCount);
+  }, [initialDisplayCount]);
 
   const visibleRecipes = recipes.slice(0, displayCount);
   const hasMore = displayCount < recipes.length;

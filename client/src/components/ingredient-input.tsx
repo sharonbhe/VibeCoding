@@ -223,7 +223,7 @@ export function IngredientInput({
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex items-center space-x-2">
           <label htmlFor="results-per-page" className="text-sm font-medium text-gray-700 whitespace-nowrap">
-            Results per page:
+            Initial recipes shown:
           </label>
           <Select value={resultsPerPage.toString()} onValueChange={(value) => onResultsPerPageChange(parseInt(value))}>
             <SelectTrigger className="w-20 py-4 rounded-xl border-2">
@@ -244,7 +244,7 @@ export function IngredientInput({
           className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Search className="h-5 w-5" />
-          <span className="text-lg">{isLoading ? 'Searching Recipes...' : 'Look for Recipes'}</span>
+          <span className="text-lg">{isLoading ? 'Searching Recipes...' : 'Find Recipes'}</span>
         </Button>
         
         {ingredients.length > 0 && (

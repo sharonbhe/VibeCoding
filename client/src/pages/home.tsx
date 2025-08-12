@@ -136,6 +136,7 @@ export default function Home() {
               isLoading={searchMutation.isPending}
               onSortChange={handleSortChange}
               totalRecipes={recipes.length}
+              initialDisplayCount={resultsPerPage}
             />
           </div>
         </section>
