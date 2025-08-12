@@ -374,7 +374,7 @@ export function IngredientInput({
         
         {/* Autocomplete Dropdown */}
         {showSuggestions && filteredSuggestions.length > 0 && (
-          <div className="absolute z-10 left-0 right-20 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+          <div className="absolute z-10 w-80 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
             {filteredSuggestions.map((suggestion) => (
               <button
                 key={suggestion}
@@ -383,7 +383,7 @@ export function IngredientInput({
               >
                 <div className="flex items-center space-x-3">
                   <Plus className="h-4 w-4 text-gray-400" />
-                  <span className="capitalize text-gray-900">{suggestion}</span>
+                  <span className="capitalize text-gray-900 text-sm">{suggestion}</span>
                 </div>
               </button>
             ))}
