@@ -26,6 +26,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         filteredRecipes = scrapedRecipes.filter(recipe => 
           recipe.cuisine?.toLowerCase() === cuisine.toLowerCase()
         );
+        
+        // Log cuisine filtering results
+        console.log(`🍽️ Filtered from ${scrapedRecipes.length} to ${filteredRecipes.length} recipes for cuisine: ${cuisine}`);
       }
       
       // Sort recipes based on the requested criteria

@@ -13,9 +13,10 @@ interface RecipeGridProps {
   totalRecipes?: number;
   initialDisplayCount?: number;
   currentSort?: string;
+  selectedCuisine?: string;
 }
 
-export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSortChange, totalRecipes, initialDisplayCount = 6, currentSort = "match" }: RecipeGridProps) {
+export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSortChange, totalRecipes, initialDisplayCount = 6, currentSort = "match", selectedCuisine = "all" }: RecipeGridProps) {
   const [displayCount, setDisplayCount] = useState(initialDisplayCount);
 
   // Reset display count when initialDisplayCount changes
@@ -43,13 +44,28 @@ export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSort
   }
 
   if (recipes.length === 0) {
+    const isFiltered = selectedCuisine && selectedCuisine !== 'all';
+    const cuisineDisplay = selectedCuisine?.charAt(0).toUpperCase() + selectedCuisine?.slice(1);
+    
     return (
       <div className="text-center py-12">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-          <span className="text-2xl">🔍</span>
+          <span className="text-2xl">{isFiltered ? '🍽️' : '🔍'}</span>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No recipes found</h3>
-        <p className="text-gray-600">Try different ingredients or check your spelling</p>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          {isFiltered ? `No ${cuisineDisplay} recipes found` : 'No recipes found'}
+        </h3>
+        <p className="text-gray-600">
+          {isFiltered 
+            ? `Try selecting "All Cuisines" or different ingredients for ${cuisineDisplay} cooking`
+            : 'Try different ingredients or check your spelling'
+          }
+        </p>
+        {isFiltered && (
+          <p className="text-sm text-gray-500 mt-2">
+            The recipes found don't match the selected cuisine filter
+          </p>
+        )}
       </div>
     );
   }

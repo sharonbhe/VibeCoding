@@ -157,6 +157,7 @@ export default function Home() {
               totalRecipes={recipes.length}
               initialDisplayCount={resultsPerPage}
               currentSort={currentSort}
+              selectedCuisine={selectedCuisine}
             />
           </div>
         </section>
