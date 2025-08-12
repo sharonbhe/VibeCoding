@@ -223,7 +223,7 @@ export function IngredientInput({
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex items-center space-x-2">
           <label htmlFor="results-per-page" className="text-sm font-medium text-gray-700 whitespace-nowrap">
-            Initial recipes shown:
+            Initial shown:
           </label>
           <Select value={resultsPerPage.toString()} onValueChange={(value) => onResultsPerPageChange(parseInt(value))}>
             <SelectTrigger className="w-20 py-4 rounded-xl border-2">
