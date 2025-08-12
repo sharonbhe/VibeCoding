@@ -267,20 +267,32 @@ export function IngredientInput({
   // Check if ingredient is valid (exists in our known ingredients list)
   const isValidIngredient = (ingredient: string) => {
     const normalizedIngredient = ingredient.toLowerCase().trim();
-    console.log('Validating ingredient:', normalizedIngredient);
     
+    // Check for exact matches or if the input is a reasonable substring of a valid ingredient
     const isValid = ALL_INGREDIENTS.some(validIngredient => {
       const validNormalized = validIngredient.toLowerCase();
-      const exactMatch = validNormalized === normalizedIngredient;
-      const containsValid = validNormalized.includes(normalizedIngredient);
-      const validContainsInput = normalizedIngredient.includes(validNormalized);
       
-      console.log(`Checking "${normalizedIngredient}" against "${validNormalized}":`, { exactMatch, containsValid, validContainsInput });
+      // Exact match
+      if (validNormalized === normalizedIngredient) {
+        return true;
+      }
       
-      return exactMatch || containsValid || validContainsInput;
+      // Allow if the input is a reasonable prefix of a valid ingredient (at least 3 chars)
+      if (normalizedIngredient.length >= 3 && validNormalized.startsWith(normalizedIngredient)) {
+        return true;
+      }
+      
+      // Allow if the valid ingredient contains the input as a word (for compound ingredients)
+      const inputWords = normalizedIngredient.split(' ');
+      const validWords = validNormalized.split(' ');
+      
+      return inputWords.every(inputWord => 
+        inputWord.length >= 3 && validWords.some(validWord => 
+          validWord === inputWord || validWord.startsWith(inputWord)
+        )
+      );
     });
     
-    console.log(`Ingredient "${normalizedIngredient}" is ${isValid ? 'valid' : 'invalid'}`);
     return isValid;
   };
 
