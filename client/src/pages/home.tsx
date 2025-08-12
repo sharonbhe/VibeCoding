@@ -56,11 +56,26 @@ export default function Home() {
 
   const handleSortChange = (sortBy: string) => {
     setCurrentSort(sortBy);
+    // Sort recipes client-side instead of re-fetching
     if (recipes.length > 0) {
-      searchMutation.mutate({
-        ingredients,
-        sortBy: sortBy as 'match' | 'time' | 'difficulty' | 'rating'
+      const sortedRecipes = [...recipes].sort((a, b) => {
+        switch (sortBy) {
+          case 'match':
+            return (b.matchPercentage || 0) - (a.matchPercentage || 0);
+          case 'time':
+            return (a.prepTime || 999) - (b.prepTime || 999);
+          case 'difficulty':
+            const difficultyOrder = { easy: 1, medium: 2, hard: 3 };
+            const aDiff = difficultyOrder[a.difficulty as keyof typeof difficultyOrder] || 4;
+            const bDiff = difficultyOrder[b.difficulty as keyof typeof difficultyOrder] || 4;
+            return aDiff - bDiff;
+          case 'rating':
+            return (b.rating || 0) - (a.rating || 0);
+          default:
+            return 0;
+        }
       });
+      setRecipes(sortedRecipes);
     }
   };
 
@@ -137,6 +152,7 @@ export default function Home() {
               onSortChange={handleSortChange}
               totalRecipes={recipes.length}
               initialDisplayCount={resultsPerPage}
+              currentSort={currentSort}
             />
           </div>
         </section>

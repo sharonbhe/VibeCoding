@@ -61,12 +61,23 @@ export function RecipeCard({ recipe, userIngredients }: RecipeCardProps) {
               {recipe.matchPercentage}% Match
             </span>
           </div>
-          {recipe.prepTime && (
-            <div className="flex items-center space-x-1 text-sm text-gray-500">
-              <Clock className="h-4 w-4" />
-              <span>{recipe.isTimeEstimated ? '~' : ''}{recipe.prepTime} min</span>
-            </div>
-          )}
+          <div className="flex items-center space-x-3 text-sm text-gray-500">
+            {recipe.difficulty && (
+              <div className="flex items-center space-x-1">
+                <div className={`w-2 h-2 rounded-full ${
+                  recipe.difficulty === 'easy' ? 'bg-green-500' :
+                  recipe.difficulty === 'medium' ? 'bg-yellow-500' : 'bg-red-500'
+                }`}></div>
+                <span className="capitalize">{recipe.difficulty}</span>
+              </div>
+            )}
+            {recipe.prepTime && (
+              <div className="flex items-center space-x-1">
+                <Clock className="h-4 w-4" />
+                <span>{recipe.isTimeEstimated ? '~' : ''}{recipe.prepTime} min</span>
+              </div>
+            )}
+          </div>
         </div>
         
         <h4 className="text-lg font-semibold text-gray-900 mb-2">

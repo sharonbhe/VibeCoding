@@ -12,9 +12,10 @@ interface RecipeGridProps {
   onSortChange: (sortBy: string) => void;
   totalRecipes?: number;
   initialDisplayCount?: number;
+  currentSort?: string;
 }
 
-export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSortChange, totalRecipes, initialDisplayCount = 6 }: RecipeGridProps) {
+export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSortChange, totalRecipes, initialDisplayCount = 6, currentSort = "match" }: RecipeGridProps) {
   const [displayCount, setDisplayCount] = useState(initialDisplayCount);
 
   // Reset display count when initialDisplayCount changes
@@ -68,7 +69,7 @@ export function RecipeGrid({ recipes, userIngredients, isLoading = false, onSort
         
         <div className="flex items-center space-x-4">
           <label className="text-sm font-medium text-gray-700">Sort by:</label>
-          <Select onValueChange={onSortChange} defaultValue="match">
+          <Select onValueChange={onSortChange} value={currentSort}>
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
