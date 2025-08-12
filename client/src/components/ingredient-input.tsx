@@ -10,6 +10,54 @@ import { DEFAULT_POPULAR_INGREDIENTS, ALL_AVAILABLE_INGREDIENTS, CUISINE_TYPES }
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+// Comprehensive list of valid ingredients for validation
+const ALL_INGREDIENTS = [
+  // Proteins
+  'chicken', 'chicken breast', 'chicken thigh', 'beef', 'pork', 'lamb', 'turkey', 'duck',
+  'fish', 'salmon', 'tuna', 'cod', 'shrimp', 'crab', 'lobster', 'scallops', 'mussels',
+  'eggs', 'tofu', 'tempeh', 'beans', 'black beans', 'kidney beans', 'chickpeas', 'lentils',
+  'bacon', 'ham', 'sausage', 'ground beef', 'ground turkey', 'ground pork',
+  
+  // Vegetables
+  'tomatoes', 'onions', 'garlic', 'potatoes', 'sweet potatoes', 'carrots', 'celery',
+  'bell peppers', 'red peppers', 'green peppers', 'yellow peppers', 'jalapeños', 'chili peppers',
+  'zucchini', 'cucumber', 'eggplant', 'broccoli', 'cauliflower', 'spinach', 'kale',
+  'lettuce', 'arugula', 'cabbage', 'brussels sprouts', 'asparagus', 'green beans',
+  'peas', 'corn', 'mushrooms', 'avocado', 'leeks', 'shallots', 'scallions', 'green onions',
+  
+  // Grains & Starches
+  'rice', 'pasta', 'noodles', 'bread', 'flour', 'quinoa', 'barley', 'oats', 'couscous',
+  'bulgur', 'farro', 'polenta', 'cornmeal', 'breadcrumbs', 'crackers',
+  
+  // Dairy & Alternatives
+  'milk', 'cream', 'heavy cream', 'sour cream', 'yogurt', 'cheese', 'cheddar cheese',
+  'mozzarella', 'parmesan', 'feta', 'goat cheese', 'cream cheese', 'butter', 'margarine',
+  'coconut milk', 'almond milk', 'oat milk',
+  
+  // Pantry Staples
+  'olive oil', 'vegetable oil', 'coconut oil', 'sesame oil', 'vinegar', 'balsamic vinegar',
+  'apple cider vinegar', 'soy sauce', 'worcestershire sauce', 'hot sauce', 'mustard',
+  'ketchup', 'mayonnaise', 'honey', 'maple syrup', 'sugar', 'brown sugar', 'salt', 'pepper',
+  
+  // Herbs & Spices
+  'basil', 'oregano', 'thyme', 'rosemary', 'sage', 'parsley', 'cilantro', 'dill', 'mint',
+  'chives', 'tarragon', 'bay leaves', 'cumin', 'paprika', 'chili powder', 'curry powder',
+  'turmeric', 'ginger', 'cinnamon', 'nutmeg', 'cloves', 'cardamom', 'coriander',
+  'fennel seeds', 'red pepper flakes', 'black pepper', 'white pepper',
+  
+  // Fruits
+  'lemons', 'limes', 'oranges', 'apples', 'bananas', 'berries', 'strawberries', 'blueberries',
+  'raspberries', 'blackberries', 'grapes', 'pineapple', 'mango', 'papaya', 'peaches', 'pears',
+  
+  // Nuts & Seeds
+  'almonds', 'walnuts', 'pecans', 'cashews', 'pistachios', 'peanuts', 'pine nuts',
+  'sunflower seeds', 'pumpkin seeds', 'sesame seeds', 'chia seeds', 'flax seeds',
+  
+  // Canned/Preserved
+  'canned tomatoes', 'tomato paste', 'tomato sauce', 'coconut', 'olives', 'capers',
+  'pickles', 'anchovies', 'canned beans', 'broth', 'stock', 'chicken stock', 'vegetable stock'
+];
+
 interface IngredientInputProps {
   ingredients: string[];
   onIngredientsChange: (ingredients: string[]) => void;
@@ -215,8 +263,29 @@ export function IngredientInput({
     }
   };
 
+  // Check if ingredient is valid (exists in our known ingredients list)
+  const isValidIngredient = (ingredient: string) => {
+    const normalizedIngredient = ingredient.toLowerCase().trim();
+    return ALL_INGREDIENTS.some(validIngredient => 
+      validIngredient.toLowerCase() === normalizedIngredient ||
+      validIngredient.toLowerCase().includes(normalizedIngredient) ||
+      normalizedIngredient.includes(validIngredient.toLowerCase())
+    );
+  };
+
   const addIngredient = (ingredient: string) => {
-    const newIngredient = ingredient.toLowerCase();
+    const newIngredient = ingredient.toLowerCase().trim();
+    
+    // Check if ingredient is valid
+    if (!isValidIngredient(newIngredient)) {
+      toast({
+        title: "Unknown ingredient",
+        description: `"${ingredient}" is not recognized. Try using common ingredient names like "chicken", "tomatoes", or "pasta".`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (newIngredient && !ingredients.includes(newIngredient)) {
       onIngredientsChange([...ingredients, newIngredient]);
       setInputValue("");
