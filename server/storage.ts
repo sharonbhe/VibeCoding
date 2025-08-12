@@ -61,6 +61,7 @@ export class MemStorage implements IStorage {
       ingredients: Array.isArray(insertRecipe.ingredients) ? insertRecipe.ingredients : [],
       instructions: insertRecipe.instructions || null,
       prepTime: insertRecipe.prepTime || null,
+      isTimeEstimated: insertRecipe.isTimeEstimated ?? true,
       difficulty: insertRecipe.difficulty || null,
       rating: insertRecipe.rating || null,
       sourceUrl: insertRecipe.sourceUrl,

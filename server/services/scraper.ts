@@ -305,6 +305,7 @@ class RecipeScraper {
     
     // Look for explicit total time statements first (most accurate)
     const totalTimePatterns = [
+      /ready\s+in\s+(\d+)\s*(?:hours?|hrs?)\s*(?:and\s+)?(\d+)?\s*(?:minutes?|mins?)/i,
       /total[^.]*?(\d+)\s*(?:hours?|hrs?)\s*(?:and\s+)?(\d+)?\s*(?:minutes?|mins?)/i,
       /total[^.]*?(\d+)\s*(?:minutes?|mins?)/i,
       /total[^.]*?(\d+)\s*(?:hours?|hrs?)/i,
@@ -320,35 +321,39 @@ class RecipeScraper {
         const totalMinutes = hours * 60 + minutes;
         
         if (totalMinutes > 0) {
+          console.log(`Found explicit total time: ${hours}h ${minutes}m = ${totalMinutes} minutes`);
           return { minutes: Math.min(totalMinutes, 300), isEstimated: false }; // Cap at 5 hours
         }
       }
     }
     
-    // Look for any explicit time mentions in instructions
-    const timeMatches = instructionsLower.match(/(\d+)\s*(?:hours?|hrs?|minutes?|mins?)/g);
+    // Look for individual time mentions and sum them up
+    const timeMatches = instructionsLower.match(/(?:at least )?(\d+)\s*(?:hours?|hrs?|minutes?|mins?)/g);
     if (timeMatches && timeMatches.length > 0) {
       let totalMinutes = 0;
-      let hasExplicitTime = false;
+      let explicitTimes: string[] = [];
       
       timeMatches.forEach(match => {
         const timeValue = parseInt(match.match(/\d+/)?.[0] || '0');
         if (match.includes('hour') || match.includes('hr')) {
           totalMinutes += timeValue * 60;
-          hasExplicitTime = true;
+          explicitTimes.push(`${timeValue}h`);
         } else if (match.includes('minute') || match.includes('min')) {
           totalMinutes += timeValue;
-          hasExplicitTime = true;
+          explicitTimes.push(`${timeValue}m`);
         }
       });
       
-      if (hasExplicitTime && totalMinutes > 0) {
+      if (explicitTimes.length > 0 && totalMinutes > 0) {
+        console.log(`Found individual times: ${explicitTimes.join(', ')} = ${totalMinutes} minutes total`);
         return { minutes: Math.min(totalMinutes, 300), isEstimated: false };
       }
     }
     
-    // Fallback to estimation
-    return { minutes: this.estimatePrepTime(instructions), isEstimated: true };
+    // Fallback to estimation - ensure it's marked as estimated
+    const estimatedTime = this.estimatePrepTime(instructions);
+    console.log(`Using estimated time: ${estimatedTime} minutes`);
+    return { minutes: estimatedTime, isEstimated: true };
   }
 
   private estimatePrepTime(instructions: string): number {
