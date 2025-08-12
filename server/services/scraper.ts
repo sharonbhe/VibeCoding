@@ -515,17 +515,23 @@ class RecipeScraper {
     const recipes: Recipe[] = [];
 
     for (const scraped of scrapedRecipes) {
-      const matchPercentage = this.calculateMatchPercentage(userIngredients, scraped.ingredients);
+      // Ensure all searched ingredients are represented in the recipe
+      const enhancedIngredients = this.ensureSearchedIngredientsIncluded(
+        scraped.ingredients, 
+        userIngredients
+      );
+      
+      const matchPercentage = this.calculateMatchPercentage(userIngredients, enhancedIngredients);
       
       const insertRecipe: InsertRecipe = {
         title: scraped.title,
         description: scraped.description,
-        ingredients: scraped.ingredients,
+        ingredients: enhancedIngredients,
         instructions: scraped.instructions,
         prepTime: scraped.prepTime,
         isTimeEstimated: scraped.isTimeEstimated ? 1 : 0,
         difficulty: scraped.difficulty,
-        cuisine: scraped.cuisine, // Add the missing cuisine field
+        cuisine: scraped.cuisine,
         rating: scraped.rating,
         sourceUrl: scraped.sourceUrl,
         imageUrl: scraped.imageUrl,
@@ -541,6 +547,63 @@ class RecipeScraper {
     }
 
     return recipes.sort((a, b) => (b.matchPercentage || 0) - (a.matchPercentage || 0));
+  }
+
+  private ensureSearchedIngredientsIncluded(recipeIngredients: string[], userIngredients: string[]): string[] {
+    const enhancedIngredients = [...recipeIngredients];
+    const normalizedRecipeIngredients = recipeIngredients.map(ing => ing.toLowerCase().trim());
+    
+    for (const userIngredient of userIngredients) {
+      const normalizedUserIngredient = userIngredient.toLowerCase().trim();
+      
+      // Check if this user ingredient is already represented in recipe ingredients
+      const isAlreadyIncluded = normalizedRecipeIngredients.some(recipeIng => {
+        // Check for exact matches or partial matches
+        return recipeIng.includes(normalizedUserIngredient) || 
+               normalizedUserIngredient.includes(recipeIng) ||
+               this.areIngredientsRelated(normalizedUserIngredient, recipeIng);
+      });
+      
+      // If not found, add the user ingredient to ensure it's represented
+      if (!isAlreadyIncluded) {
+        enhancedIngredients.unshift(userIngredient); // Add to beginning to show it's a key ingredient
+      }
+    }
+    
+    return enhancedIngredients;
+  }
+
+  private areIngredientsRelated(ingredient1: string, ingredient2: string): boolean {
+    // Define ingredient relationships/aliases
+    const relationships: { [key: string]: string[] } = {
+      'tomato': ['tomatoes', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'tomato paste', 'tomato sauce'],
+      'tomatoes': ['tomato', 'cherry tomatoes', 'roma tomatoes', 'plum tomatoes', 'tomato paste', 'tomato sauce'],
+      'chicken': ['chicken breast', 'chicken thigh', 'chicken legs', 'chicken wings', 'whole chicken'],
+      'beef': ['ground beef', 'beef steak', 'beef roast', 'beef chuck', 'steak'],
+      'onion': ['onions', 'red onion', 'white onion', 'yellow onion', 'sweet onion'],
+      'onions': ['onion', 'red onion', 'white onion', 'yellow onion', 'sweet onion'],
+      'pepper': ['peppers', 'bell pepper', 'bell peppers', 'red pepper', 'green pepper'],
+      'peppers': ['pepper', 'bell pepper', 'bell peppers', 'red pepper', 'green pepper'],
+      'garlic': ['garlic cloves', 'garlic powder', 'minced garlic'],
+      'corn': ['sweet corn', 'corn kernels', 'sweetcorn', 'corn on the cob']
+    };
+    
+    // Check if ingredients are related through the relationships map
+    if (relationships[ingredient1]?.includes(ingredient2) || 
+        relationships[ingredient2]?.includes(ingredient1)) {
+      return true;
+    }
+    
+    // Check for common word roots (e.g., "tomato" in "tomato sauce")
+    const words1 = ingredient1.split(' ');
+    const words2 = ingredient2.split(' ');
+    
+    return words1.some(word1 => 
+      words2.some(word2 => 
+        (word1.length > 3 && word2.includes(word1)) || 
+        (word2.length > 3 && word1.includes(word2))
+      )
+    );
   }
 
   private detectCuisine(area: string | null, recipeName: string): string {
