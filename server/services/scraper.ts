@@ -211,19 +211,33 @@ class RecipeScraper {
   }
 
   private calculateMatchPercentage(userIngredients: string[], recipeIngredients: string[]): number {
-    const normalizedUserIngredients = userIngredients.map(ing => ing.toLowerCase().trim());
+    if (userIngredients.length === 0) return 0;
+
     const normalizedRecipeIngredients = recipeIngredients.map(ing => ing.toLowerCase().trim());
     
-    let matchCount = 0;
-    for (const userIng of normalizedUserIngredients) {
-      if (normalizedRecipeIngredients.some(recipeIng => 
-        recipeIng.includes(userIng) || userIng.includes(recipeIng)
-      )) {
-        matchCount++;
-      }
-    }
-    
-    return Math.round((matchCount / normalizedUserIngredients.length) * 100);
+    const matches = userIngredients.filter(userIng => {
+      const normalizedUserIng = userIng.toLowerCase().trim();
+      
+      return normalizedRecipeIngredients.some(recipeIng => {
+        // Direct matches
+        if (recipeIng.includes(normalizedUserIng) || normalizedUserIng.includes(recipeIng)) {
+          console.log(`     ✓ Direct match for "${userIng}": "${recipeIng}"`);
+          return true;
+        }
+        
+        // Check ingredient relationships
+        if (this.areIngredientsRelated(normalizedUserIng, recipeIng)) {
+          console.log(`     ✓ Related match for "${userIng}": "${recipeIng}"`);
+          return true;
+        }
+        
+        return false;
+      });
+    });
+
+    const matchPercentage = Math.round((matches.length / userIngredients.length) * 100);
+    console.log(`     Found ${matches.length}/${userIngredients.length} ingredient matches`);
+    return matchPercentage;
   }
 
   async scrapeRecipes(ingredients: string[]): Promise<Recipe[]> {
@@ -518,20 +532,14 @@ class RecipeScraper {
       console.log(`\n🍽️ Processing recipe: "${scraped.title}"`);
       console.log(`   Original ingredients: [${scraped.ingredients.join(', ')}]`);
       
-      // Ensure all searched ingredients are represented in the recipe
-      const enhancedIngredients = this.ensureSearchedIngredientsIncluded(
-        scraped.ingredients, 
-        userIngredients
-      );
-      
-      console.log(`   Enhanced ingredients: [${enhancedIngredients.join(', ')}]`);
-      const matchPercentage = this.calculateMatchPercentage(userIngredients, enhancedIngredients);
+      // Calculate match percentage based on original ingredients only
+      const matchPercentage = this.calculateMatchPercentage(userIngredients, scraped.ingredients);
       console.log(`   Match percentage: ${matchPercentage}%`);
       
       const insertRecipe: InsertRecipe = {
         title: scraped.title,
         description: scraped.description,
-        ingredients: enhancedIngredients,
+        ingredients: scraped.ingredients, // Keep original ingredients
         instructions: scraped.instructions,
         prepTime: scraped.prepTime,
         isTimeEstimated: scraped.isTimeEstimated ? 1 : 0,
